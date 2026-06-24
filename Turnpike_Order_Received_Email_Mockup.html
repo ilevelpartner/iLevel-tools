@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnpike — Turnover Received Email (clean)</title>
+<style>
+  body{margin:0;background:#eceef1;font-family:"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;color:#1f2733;-webkit-font-smoothing:antialiased}
+  .pagepad{max-width:760px;margin:0 auto;padding:28px 20px 70px}
+  .pageintro{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E2611F;margin:6px 0 4px}
+  .pagetitle{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0 0 4px;color:#1f2733}
+  .pagesub{color:#6b7280;font-size:14px;margin:0 0 22px}
+
+  /* email frame */
+  .mail{max-width:600px;margin:0 auto;background:#fff;border-radius:10px;box-shadow:0 6px 24px rgba(16,24,40,.10);overflow:hidden}
+  .logo{padding:30px 32px 0}
+  .logo span{font-size:20px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,#E0912E,#E2611F);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .h1{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.2;margin:18px 0 0;padding:0 32px;color:#1e1e1e}
+  .content{padding:18px 32px 32px;color:#4b4b4b;font-size:16px;line-height:1.55}
+  .content p{margin:0 0 16px}
+  .btnlink{display:inline-block;background:#E0912E;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 20px;border-radius:9px;margin:2px 0 6px}
+  .h2{color:#1e1e1e;font-size:20px;font-weight:bold;line-height:1.5;margin:8px 0 16px}
+
+  table.items{width:100%;border-collapse:collapse;font-size:15px;color:#4b4b4b}
+  table.items th{text-align:left;padding:8px 0;font-size:13px;color:#787c82;border-bottom:1px solid #e6e7eb}
+  table.items th.r{text-align:right}
+  .itemrow td{padding:14px 0;border-bottom:1px solid #f0f0ee;vertical-align:top}
+  .iname{color:#1e1e1e;font-size:15px;font-weight:600;margin:0 0 4px}
+  .imeta{color:#787c82;font-size:13px;display:flex;align-items:center;gap:6px}
+  .imeta svg{width:13px;height:13px;stroke:#E2611F;fill:none;stroke-width:1.8;flex:none}
+  .pills{margin-top:7px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;color:#15803d;background:#e7f6ec;border:1px solid #c9ecd4;border-radius:5px;padding:2px 7px;margin:0 4px 0 0}
+  .pill.total{background:#15803d;color:#fff;border-color:#15803d}
+  .qty{text-align:right;white-space:nowrap;color:#4b4b4b;padding-left:10px}
+  .amt{text-align:right;white-space:nowrap;color:#1e1e1e;font-weight:600;padding-left:10px}
+
+  table.totals{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+  table.totals td{padding:7px 0}
+  table.totals td.r{text-align:right}
+  .tlabel{color:#4b4b4b}
+  .deal-terms{color:#15803d;font-weight:700}
+  .grand td{font-weight:800;font-size:18px;color:#1e1e1e;border-top:2px solid #e6e7eb;padding-top:12px}
+  .note{font-size:12.5px;color:#9aa1ac;margin-top:8px}
+
+  .ship{margin-top:24px;padding-top:20px;border-top:1px solid #e6e7eb}
+  .ship b{color:#1e1e1e;display:block;margin-bottom:4px;font-size:14px}
+  .ship .addr{color:#4b4b4b;font-size:14px;line-height:1.5}
+  .help{text-align:center;color:#1e1e1e;font-size:14px;padding:28px 0 0;margin:0}
+  .foot{border-top:1px solid #e6e7eb;text-align:center;color:#9aa1ac;font-size:12px;padding:24px 32px}
+
+  .improv{max-width:600px;margin:18px auto 0;background:#fff7ec;border:1px solid #f0d9b5;border-radius:10px;padding:16px 18px}
+  .improv h4{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#b45309}
+  .improv ul{margin:0;padding-left:18px;color:#92400e;font-size:13px}
+  .improv li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="pagepad">
+  <div class="pageintro">Project #3 · Email</div>
+  <div class="pagetitle">Turnover received &mdash; buyer email</div>
+  <div class="pagesub">Same WooCommerce order-email structure, restyled to Turnpike and cleaned up: turnover (not invoice), ship-to (not billing), one clean distributor line per item, deal shown as OI/MCB pills, no PDF, no payment line.</div>
+
+  <div class="mail">
+    <div class="logo"><span>Turnpike</span></div>
+    <h1 class="h1">We&rsquo;ve received your turnover</h1>
+    <div class="content">
+      <p>Hi Archie,</p>
+      <p>Thanks &mdash; we&rsquo;ve received your turnover and it&rsquo;s being validated. We&rsquo;ll email you again once it&rsquo;s submitted to your distributor.</p>
+      <p><a class="btnlink" href="#">View your turnover in your account</a></p>
+
+      <h2 class="h2">Turnover summary &mdash; Order #5070 &middot; June 24, 2026</h2>
+      <table class="items">
+        <thead><tr><th>Product</th><th class="r">Qty</th><th class="r">Wholesale</th></tr></thead>
+        <tbody>
+          <tr class="itemrow">
+            <td>
+              <div class="iname">Bianco DiNapoli Organic Crushed Tomatoes</div>
+              <div class="imeta"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> KeHE &middot; Bloomington (DC 16)</div>
+              <div class="pills"><span class="pill">5% MCB</span><span class="pill total">Total 5%</span></div>
+            </td>
+            <td class="qty">&times;1 case</td>
+            <td class="amt">$28.80</td>
+          </tr>
+          <tr class="itemrow">
+            <td>
+              <div class="iname">Coconut Crunch Cereal &mdash; 7oz</div>
+              <div class="imeta"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> KeHE &middot; Bloomington (DC 16)</div>
+              <div class="pills"><span class="pill">5% MCB</span><span class="pill total">Total 5%</span></div>
+            </td>
+            <td class="qty">&times;2 cases</td>
+            <td class="amt">$64.00</td>
+          </tr>
+          <tr class="itemrow">
+            <td>
+              <div class="iname">Skoy Scrub &mdash; Eco Dish Scrubber</div>
+              <div class="imeta"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> KeHE &middot; Bloomington (DC 16)</div>
+              <div class="pills"><span class="pill">15% OI</span><span class="pill">35% MCB</span><span class="pill total">Total 50%</span></div>
+            </td>
+            <td class="qty">&times;1 case</td>
+            <td class="amt">$24.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="totals">
+        <tr><td class="tlabel">Wholesale subtotal</td><td class="r">$116.80</td></tr>
+        <tr><td class="tlabel">Total deal</td><td class="r deal-terms">OI + MCB</td></tr>
+        <tr class="grand"><td>Total wholesale</td><td class="r">$116.80</td></tr>
+      </table>
+      <p class="note">Deal terms (OI/MCB) are shown per item and applied on your turnover. Final figures confirm with your distributor.</p>
+
+      <div class="ship">
+        <b>Ships to</b>
+        <div class="addr">Griffin Natural Market<br>4 Rona Ln<br>Franklin, MA 02038<br>Account #87233 (KeHE)</div>
+      </div>
+
+      <p class="help">Questions about your turnover? Contact us at <a href="mailto:sales@ilevelturnpike.com" style="color:#E2611F;text-decoration:underline">sales@ilevelturnpike.com</a>.</p>
+    </div>
+    <div class="foot">Turnpike &mdash; wholesale reordering for independent retailers<br>sales@ilevelturnpike.com</div>
+  </div>
+
+  <div class="improv">
+    <h4>Improvements applied (vs. the current email)</h4>
+    <ul>
+      <li><b>&ldquo;Turnover&rdquo;</b> throughout &mdash; heading, link, and summary; no &ldquo;invoice&rdquo; wording.</li>
+      <li><b>No PDF attachment</b> &mdash; a button links to the turnover in the buyer&rsquo;s account instead.</li>
+      <li><b>No payment line</b> &mdash; the &ldquo;pay with cash upon delivery&rdquo; line is removed (Turnpike takes no payment).</li>
+      <li><b>Ships to</b> (store shipping address + account number), not &ldquo;Billing address.&rdquo;</li>
+      <li><b>One clean distributor &middot; DC line</b> per item &mdash; no duplicated/stacked distributor meta.</li>
+      <li><b>Deal shown as pills</b> &mdash; OI / MCB components then a Total pill; every item has a default 5% MCB.</li>
+      <li><b>Footer</b> is the customer-service email &mdash; no street address; addresses the buyer by name.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
