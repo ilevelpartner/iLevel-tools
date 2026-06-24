@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnpike — Product Card & PDP Mockup (WS3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#E0912E; --orange-deep:#E2611F; --orange-press:#c97e22;
+    --ink:#1f2733; --muted:#6b7280; --faint:#9aa1ac;
+    --line:#e6e7eb; --bg:#f6f6f4; --card:#ffffff;
+    --deal:#15803d; --deal-bg:#e7f6ec;
+    --disc:#6d28d9; --disc-bg:#f3effc;
+    --anno:#b45309; --anno-bg:#fff7ec; --anno-line:#f0d9b5;
+    --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px 80px}
+
+  /* top bar */
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .topbar .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:16px;padding-bottom:16px}
+  .brand{font-weight:800;font-size:24px;letter-spacing:-.02em;
+    background:linear-gradient(90deg,var(--orange),var(--orange-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .nav{display:flex;gap:22px;font-size:14px;color:var(--ink);font-weight:500}
+  .nav a{color:inherit;text-decoration:none;opacity:.8}
+  .dc-chip{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;color:var(--ink)}
+  .dc-dot{width:7px;height:7px;border-radius:50%;background:var(--deal)}
+
+  /* page heading */
+  .ph{padding:40px 0 8px}
+  .ph .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange-deep)}
+  .ph h1{font-size:26px;margin:8px 0 4px;letter-spacing:-.02em}
+  .ph p{color:var(--muted);margin:0;max-width:620px}
+  .toolbar{display:flex;align-items:center;gap:12px;margin:18px 0 4px}
+  .toggle{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+  .toggle .sw{width:34px;height:20px;border-radius:999px;background:#d8dbe0;position:relative;transition:.18s}
+  .toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  body.anno-on .toggle .sw{background:var(--orange)}
+  body.anno-on .toggle .sw::after{transform:translateX(14px)}
+
+  .section-label{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:38px 0 14px}
+
+  /* card grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+  .thumb{aspect-ratio:1/1;background:linear-gradient(135deg,#faf7f2,#f0ece4);position:relative;display:flex;align-items:center;justify-content:center}
+  .thumb .ph-ico{width:54px;height:54px;opacity:.35}
+  .ribbon{position:absolute;top:12px;left:12px;font-size:11px;font-weight:700;letter-spacing:.04em;padding:5px 10px;border-radius:999px;text-transform:uppercase}
+  .ribbon.deal{background:var(--deal);color:#fff}
+  .ribbon.disc{background:var(--disc);color:#fff}
+  .ribbon.new{background:#0e7490;color:#fff}
+  .wish{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .wish svg{width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:1.8}
+
+  .body{padding:15px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .brandname{font-size:12px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+  .pname{font-size:15.5px;font-weight:600;line-height:1.3;margin:-4px 0 0}
+  .casepack{font-size:12.5px;color:var(--muted)}
+
+  /* pricing block */
+  .price{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+  .price .now{font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .price .now.struck{color:var(--faint);text-decoration:line-through;font-weight:700;font-size:18px}
+  .price .unit{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:3px}
+  .pricelabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:-4px}
+  .srp{font-size:13px;color:var(--muted)}
+  .srp b{color:var(--ink);font-weight:600}
+  .deals{display:flex;gap:6px;flex-wrap:wrap}
+  .deal-badge{font-size:11.5px;font-weight:700;color:var(--deal);background:var(--deal-bg);border:1px solid #cde-d6;border:1px solid #c9ecd4;padding:3px 8px;border-radius:7px}
+  .estnote{font-size:11.5px;color:var(--faint);display:flex;align-items:center;gap:5px}
+  .estnote svg{width:13px;height:13px;stroke:var(--faint);fill:none;stroke-width:1.7;flex:none}
+
+  /* ships via */
+  .ships{font-size:12.5px;display:flex;align-items:center;gap:6px;color:var(--muted)}
+  .ships svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.7;flex:none}
+  .ships b{color:var(--ink);font-weight:600}
+  select.shipsel{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);
+    border:1px solid var(--line);border-radius:8px;padding:6px 26px 6px 9px;background:#fff;
+    appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;cursor:pointer}
+  .ships-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+
+  /* qty + actions */
+  .controls{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .qtyrow{display:flex;align-items:center;gap:10px}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .stepper button{width:36px;height:38px;border:none;background:#fff;font-size:19px;color:var(--ink);cursor:pointer;line-height:1}
+  .stepper button:hover{background:#f7f7f5}
+  .stepper input{width:42px;height:38px;border:none;text-align:center;font-family:inherit;font-size:15px;font-weight:600;color:var(--ink);border-left:1px solid var(--line);border-right:1px solid var(--line)}
+  .qtyunit{font-size:12.5px;color:var(--muted)}
+  .btn{font-family:inherit;font-weight:700;font-size:14px;border-radius:10px;padding:11px 14px;cursor:pointer;border:1px solid transparent;text-align:center}
+  .btn.primary{background:var(--orange);color:#fff}
+  .btn.primary:hover{background:var(--orange-press)}
+  .btn.disc{background:var(--disc);color:#fff}
+  .btn.disc:hover{filter:brightness(.94)}
+  .btn.ghost{background:#fff;color:var(--ink);border-color:var(--line)}
+  .btn.ghost:hover{background:#f7f7f5}
+  .btn-row{display:flex;gap:8px}
+  .btn-row .btn{flex:1}
+  .iconbtn{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  /* annotation */
+  .anno{display:none;font-size:12px;line-height:1.45;color:var(--anno);background:var(--anno-bg);
+    border:1px solid var(--anno-line);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;
+    padding:8px 11px;margin-top:2px}
+  body.anno-on .anno{display:block}
+  .anno b{color:#92400e}
+
+  /* PDP */
+  .pdp{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+    display:grid;grid-template-columns:minmax(0,440px) 1fr;gap:36px;padding:30px}
+  @media(max-width:880px){.pdp{grid-template-columns:1fr;padding:22px}}
+  .pdp .gallery{aspect-ratio:1/1;border-radius:14px;background:linear-gradient(135deg,#faf7f2,#efe9e0);display:flex;align-items:center;justify-content:center}
+  .pdp .gallery svg{width:84px;height:84px;opacity:.3}
+  .pdp h2{font-size:25px;margin:2px 0 2px;letter-spacing:-.02em;line-height:1.2}
+  .pdp .desc{color:var(--muted);font-size:14px;margin:14px 0 6px}
+  .specline{font-size:13px;color:var(--ink);font-weight:600;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:8px 0 4px;display:flex;gap:18px}
+  .specline span{color:var(--muted);font-weight:500}
+  .pdp .price .now{font-size:30px}
+  .pdp .price .now.struck{font-size:22px}
+  .divider{height:1px;background:var(--line);margin:18px 0}
+  .pdp .controls{flex-direction:row;align-items:flex-end;gap:14px;flex-wrap:wrap}
+  .pdp .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .pdp .actions .btn{padding:12px 20px}
+
+  .legend{margin-top:46px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  .legend h3{margin:0 0 12px;font-size:15px}
+  .legend ul{margin:0;padding-left:18px;color:var(--muted);font-size:13.5px}
+  .legend li{margin:7px 0}
+  .legend b{color:var(--ink)}
+  .footy{margin-top:28px;font-size:12px;color:var(--faint);text-align:center}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand">Turnpike</div>
+    <div class="nav">
+      <a>New Arrivals</a><a>Sale</a><a>Brands</a><a>Discovery</a>
+    </div>
+    <div class="dc-chip"><span class="dc-dot"></span> KeHE · Bloomington (DC 16)</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="ph">
+    <div class="eyebrow">WS3 · Product card &amp; PDP</div>
+    <h1>Product card &amp; detail — buyer view</h1>
+    <p>How a buyer sees pricing, routing, quantity, and actions. Wholesale leads as the buyer’s cost; SRP is a benchmark; deal terms strike the wholesale number; actions are reduced to the rationalized set.</p>
+    <div class="toolbar">
+      <div class="toggle" id="annoToggle" role="button" tabindex="0" aria-pressed="false">
+        <span class="sw"></span> Show spec annotations
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Product listing — cards</div>
+  <div class="grid">
+
+    <!-- CARD A: orderable, single-source, normal price -->
+    <div class="card">
+      <div class="thumb">
+        <svg class="ph-ico" viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+        <div class="wish" title="Add to wishlist"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-8.5C.5 9 2 5.5 5.5 5.5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3C18 5.5 19.5 9 17.5 12.5 15 16.5 12 21 12 21z"/></svg></div>
+      </div>
+      <div class="body">
+        <div class="brandname">Lunchskins</div>
+        <p class="pname">Reusable Paper Sandwich Bags — Kraft</p>
+        <div class="casepack">Inner pack: 6 · Master case: 6</div>
+
+        <div class="pricelabel">Est. wholesale</div>
+        <div class="price">
+          <span class="now">$39.00</span><span class="unit">/ case</span>
+        </div>
+        <div class="srp">SRP <b>$9.99</b> / unit</div>
+        <div class="estnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg> Estimate — confirm with your DC</div>
+
+        <div class="ships"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> Ships via <b>KeHE · Bloomington</b></div>
+        <div class="anno"><b>6.1</b> Wholesale leads as the buyer’s cost; SRP labeled as benchmark; estimate note kept. <br><b>6.3</b> Single-source — auto-routed silently, source shown inline (no prompt).</div>
+
+        <div class="controls">
+          <div class="qtyrow">
+            <div class="stepper"><button aria-label="decrease">−</button><input value="2"><button aria-label="increase">+</button></div>
+            <span class="qtyunit">cases</span>
+          </div>
+          <button class="btn primary">Add to cart</button>
+          <div class="btn-row">
+            <button class="btn ghost iconbtn"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Request sample</button>
+          </div>
+          <div class="anno"><b>6.4</b> Quantity stepper (not fixed 1); quantities in <b>cases</b>. <br><b>6.2</b> Rationalized actions: Add to cart · Request sample · Wishlist (heart). No Save-for-Later, no duplicate Wishlist.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD B: orderable, ON DEAL, multi-DC -->
+    <div class="card">
+      <div class="thumb">
+        <span class="ribbon deal">On deal</span>
+        <svg class="ph-ico" viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+        <div class="wish" title="Add to wishlist"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-8.5C.5 9 2 5.5 5.5 5.5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3C18 5.5 19.5 9 17.5 12.5 15 16.5 12 21 12 21z"/></svg></div>
+      </div>
+      <div class="body">
+        <div class="brandname">Skoy</div>
+        <p class="pname">Skoy Scrub — Eco Dish Scrubber</p>
+        <div class="casepack">Inner pack: 6 · Master case: 6</div>
+
+        <div class="pricelabel">Est. wholesale</div>
+        <div class="price">
+          <span class="now struck">$24.00</span><span class="unit">/ case · on deal</span>
+        </div>
+        <div class="deals">
+          <span class="deal-badge">15% OI</span>
+          <span class="deal-badge">35% MCB</span>
+        </div>
+        <div class="srp">SRP <b>$5.99</b> / unit</div>
+        <div class="estnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg> Estimate — confirm with your DC</div>
+
+        <div class="ships-row"><svg style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.7" viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> Ships via
+          <select class="shipsel"><option>KeHE · Bloomington</option><option>UNFI · Moreno Valley</option></select>
+        </div>
+        <div class="anno"><b>6.1 / WS5</b> On deal: wholesale gets a <b>strike-through</b>; deal terms show as <b>15% OI</b> / <b>35% MCB</b> badges (OI-only, MCB-only, or both). <br><b>6.3</b> Carried at 2+ of the buyer’s DCs → editable <b>“Ships via”</b> selector writes the routing DC onto the cart line.</div>
+
+        <div class="controls">
+          <div class="qtyrow">
+            <div class="stepper"><button aria-label="decrease">−</button><input value="1"><button aria-label="increase">+</button></div>
+            <span class="qtyunit">cases</span>
+          </div>
+          <button class="btn primary">Add to cart</button>
+          <div class="btn-row">
+            <button class="btn ghost iconbtn"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Request sample</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD C: Discovery -->
+    <div class="card">
+      <div class="thumb">
+        <span class="ribbon disc">Discovery</span>
+        <svg class="ph-ico" viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+        <div class="wish" title="Add to wishlist"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-8.5C.5 9 2 5.5 5.5 5.5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3C18 5.5 19.5 9 17.5 12.5 15 16.5 12 21 12 21z"/></svg></div>
+      </div>
+      <div class="body">
+        <div class="brandname">ECOLIPS</div>
+        <p class="pname">Organic Lip Balm — Vanilla Honey</p>
+        <div class="casepack">Inner pack: 6 · Master case: 6</div>
+
+        <div class="pricelabel">Est. wholesale</div>
+        <div class="price"><span class="now">$28.50</span><span class="unit">/ case</span></div>
+        <div class="srp">SRP <b>$3.99</b> / unit</div>
+        <div class="estnote" style="color:var(--disc)"><svg viewBox="0 0 24 24" style="stroke:var(--disc)"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> Not at your DCs — pre-commit to help bring it in</div>
+        <div class="anno"><b>WS7</b> Discovery = not carried at the buyer’s DCs. No “Add to cart.” Actions become <b>Pre-commit · Request sample · Wishlist</b>. Pre-commit is a quantified demand signal per brand × DC.</div>
+
+        <div class="controls">
+          <div class="qtyrow">
+            <div class="stepper"><button aria-label="decrease">−</button><input value="3"><button aria-label="increase">+</button></div>
+            <span class="qtyunit">cases (intended)</span>
+          </div>
+          <button class="btn disc">Pre-commit</button>
+          <div class="btn-row">
+            <button class="btn ghost iconbtn"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Request sample</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PDP -->
+  <div class="section-label">Product detail page (PDP) — Skoy example</div>
+  <div class="pdp">
+    <div class="gallery">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.1"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+    </div>
+    <div class="detail">
+      <div class="brandname">Skoy</div>
+      <h2>Skoy Scrub — Eco Dish Scrubber</h2>
+      <p class="desc">Reusable, compostable cloth scrubber. Replaces 15 rolls of paper towels. Sold by the case.</p>
+      <div class="specline">Inner pack: 6 <span>·</span> Master case: 6 <span>·</span> UPC 8 5395 00012 4</div>
+
+      <div class="pricelabel" style="margin-top:14px">Est. wholesale</div>
+      <div class="price">
+        <span class="now struck">$24.00</span><span class="unit">/ case · on deal</span>
+      </div>
+      <div class="deals" style="margin-top:8px">
+        <span class="deal-badge">15% OI</span>
+        <span class="deal-badge">35% MCB</span>
+      </div>
+      <div class="srp" style="margin-top:8px">SRP <b>$5.99</b> / unit — your margin benchmark</div>
+      <div class="estnote" style="margin-top:6px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg> Price is an estimate — confirm with your DC</div>
+      <div class="anno"><b>6.1 / WS5</b> Wholesale leads (struck when on deal) with OI/MCB terms; SRP is the labeled retail benchmark for margin; estimate note retained.</div>
+
+      <div class="divider"></div>
+
+      <div class="ships-row"><svg style="width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:1.7" viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> Ships via
+        <select class="shipsel"><option>KeHE · Bloomington (DC 16)</option><option>UNFI · Moreno Valley</option></select>
+      </div>
+      <div class="anno"><b>6.3</b> 2+ held DCs carry it → editable “Ships via”. Single-source would auto-route silently and show the source inline instead.</div>
+
+      <div class="controls">
+        <div class="qtyrow">
+          <div class="stepper"><button aria-label="decrease">−</button><input value="4"><button aria-label="increase">+</button></div>
+          <span class="qtyunit">cases</span>
+        </div>
+      </div>
+      <div class="anno"><b>6.4</b> Quantity stepper, in cases / inner-packs (not units). Case-pack shown under the description above.</div>
+
+      <div class="actions">
+        <button class="btn primary">Add to cart</button>
+        <button class="btn ghost iconbtn"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Request sample</button>
+        <button class="btn ghost iconbtn"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-8.5C.5 9 2 5.5 5.5 5.5c2 0 3.5 1.5 4.5 3 1-1.5 2.5-3 4.5-3C18 5.5 19.5 9 17.5 12.5 15 16.5 12 21 12 21z"/></svg>Wishlist</button>
+      </div>
+      <div class="anno"><b>6.2</b> Reduced from the current five actions to three: <b>Add to cart · Request sample · Wishlist</b>. Save-for-Later removed (persistent cart + Wishlist replace it); no duplicate wishlist.</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <h3>What each element maps to</h3>
+    <ul>
+      <li><b>6.1 Pricing</b> — wholesale (the buyer’s cost) is the lead price; SRP is a labeled benchmark; the “estimate — confirm with your DC” note stays. On deal, wholesale is struck and the OI/MCB terms show as badges (WS5).</li>
+      <li><b>6.2 Actions</b> — orderable products: Add to cart, Request sample, Wishlist. Discovery products: Pre-commit, Request sample, Wishlist. No Save-for-Later; no duplicate wishlist.</li>
+      <li><b>6.3 Routing</b> — 2+ held DCs carry it → editable “Ships via” selector on the line; single-source auto-routes silently and shows the source inline.</li>
+      <li><b>6.4 Quantity &amp; case pack</b> — stepper (not fixed 1); quantities in cases/inner-packs; case-pack shown under the description.</li>
+    </ul>
+  </div>
+
+  <div class="footy">Turnpike · WS3 mockup — visual reference for development, not final styling.</div>
+</div>
+
+<script>
+  const t=document.getElementById('annoToggle');
+  function toggle(){const on=document.body.classList.toggle('anno-on');t.setAttribute('aria-pressed',on);}
+  t.addEventListener('click',toggle);
+  t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  // steppers
+  document.querySelectorAll('.stepper').forEach(s=>{
+    const inp=s.querySelector('input');const[dec,inc]=s.querySelectorAll('button');
+    dec.onclick=()=>inp.value=Math.max(1,(parseInt(inp.value)||1)-1);
+    inc.onclick=()=>inp.value=(parseInt(inp.value)||0)+1;
+  });
+</script>
+</body>
+</html>
