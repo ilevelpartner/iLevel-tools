@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnpike — Registration Flow Mockup (3 pages)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#E0912E; --orange-deep:#E2611F; --orange-press:#c97e22;
+    --ink:#1f2733; --muted:#6b7280; --faint:#9aa1ac;
+    --line:#e6e7eb; --field:#eef1f8; --bg:#f6f6f4; --card:#ffffff;
+    --anno:#b45309; --anno-bg:#fff7ec; --anno-line:#f0d9b5;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 10px 30px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+
+  .topbar{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .topbar .inner{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+  .brand{font-weight:800;font-size:24px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--orange),var(--orange-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .ph{padding:40px 0 6px}
+  .ph .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange-deep)}
+  .ph h1{font-size:26px;margin:8px 0 4px;letter-spacing:-.02em}
+  .ph p{color:var(--muted);margin:0;max-width:640px}
+  .toggle{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;user-select:none;margin-top:18px}
+  .toggle .sw{width:34px;height:20px;border-radius:999px;background:#d8dbe0;position:relative;transition:.18s}
+  .toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  body.anno-on .toggle .sw{background:var(--orange)}
+  body.anno-on .toggle .sw::after{transform:translateX(14px)}
+
+  .screens{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:26px}
+  @media(max-width:980px){.screens{grid-template-columns:1fr}}
+
+  .screen{}
+  .screen-tag{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:0 0 10px}
+  .frame{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:30px 30px 26px}
+
+  /* stepper */
+  .steps{display:flex;align-items:center;justify-content:center;gap:0;margin:4px auto 26px;max-width:340px}
+  .step{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none;border:2px solid var(--line);color:var(--faint);background:#fff}
+  .step.on{background:var(--orange);border-color:var(--orange);color:#fff}
+  .step-line{height:2px;flex:1;background:var(--line)}
+  .step-line.on{background:var(--orange)}
+  .step-line.dash{background:repeating-linear-gradient(90deg,var(--line) 0 6px,transparent 6px 12px)}
+
+  .title{text-align:center;font-size:24px;font-weight:700;letter-spacing:-.02em;margin:0 0 22px}
+  .sect{font-size:17px;font-weight:700;margin:6px 0 14px}
+  .sub{font-size:13px;font-weight:700;color:var(--ink);margin:18px 0 10px;letter-spacing:.01em}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px}
+  .field label .req{color:#dc2626}
+  .input,.selectish{width:100%;height:44px;border:none;background:var(--field);border-radius:999px;padding:0 16px;font-family:inherit;font-size:14.5px;color:var(--ink);display:flex;align-items:center}
+  .input.txt{color:var(--ink)}
+  .input.placeholder,.selectish.placeholder{color:var(--faint)}
+  .selectish{justify-content:space-between}
+  .selectish::after{content:"▾";color:var(--muted);font-size:12px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:560px){.row2,.row3{grid-template-columns:1fr}}
+
+  .note-inline{font-size:13px;color:var(--muted);background:#faf7f2;border:1px dashed var(--line);border-radius:10px;padding:10px 13px;margin:4px 0 4px}
+
+  .agree{display:flex;align-items:flex-start;gap:10px;margin:18px 0 14px;font-size:14px}
+  .agree .box{width:20px;height:20px;border-radius:5px;background:var(--orange);flex:none;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .agree .box svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:3}
+  .agree a{color:var(--orange-deep);font-weight:600;text-decoration:none}
+  .captcha{display:flex;align-items:center;justify-content:space-between;width:300px;max-width:100%;border:1px solid #d3d6db;border-radius:6px;padding:12px 14px;margin:6px 0 20px;background:#fafafa}
+  .captcha .l{display:flex;align-items:center;gap:11px;font-size:14px;color:#3c4043}
+  .captcha .chk{width:22px;height:22px;border:2px solid #c7cace;border-radius:3px;display:flex;align-items:center;justify-content:center}
+  .captcha .chk svg{width:15px;height:15px;stroke:#16a34a;fill:none;stroke-width:3}
+  .captcha .rc{font-size:9px;color:#9aa1ac;text-align:center;line-height:1.3}
+  .captcha .rc b{display:block;color:#5b6066;font-size:10px}
+
+  .actions{display:flex;align-items:center;justify-content:space-between;margin-top:24px}
+  .btn{font-family:inherit;font-weight:700;font-size:15px;border-radius:999px;padding:12px 26px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:9px}
+  .btn.ghost{background:#f1f2f4;color:var(--ink)}
+  .btn.primary{background:var(--orange);color:#fff}
+  .btn.primary:hover{background:var(--orange-press)}
+
+  /* DC group box */
+  .dcbox{border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:8px}
+
+  /* confirmation */
+  .confirm{min-height:230px;display:flex;flex-direction:column;justify-content:center}
+  .confirm .msg{font-size:18px;line-height:1.6;max-width:560px;margin:0 auto;text-align:center;color:var(--ink)}
+  .confirm .check{width:54px;height:54px;border-radius:50%;background:#e7f6ec;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+  .confirm .check svg{width:28px;height:28px;stroke:#15803d;fill:none;stroke-width:2.4}
+
+  /* annotation */
+  .anno{display:none;font-size:12px;line-height:1.45;color:var(--anno);background:var(--anno-bg);border:1px solid var(--anno-line);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:9px 12px;margin:12px 0 0}
+  body.anno-on .anno{display:block}
+  .anno b{color:#92400e}
+  .anno .new{color:#15803d;font-weight:700}
+  .anno .rm{color:#b91c1c;font-weight:700}
+
+  .legend{margin-top:40px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  .legend h3{margin:0 0 12px;font-size:15px}
+  .legend ul{margin:0;padding-left:18px;color:var(--muted);font-size:13.5px}
+  .legend li{margin:7px 0}.legend b{color:var(--ink)}
+  .footy{margin-top:26px;font-size:12px;color:var(--faint);text-align:center}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="inner"><div class="brand">Turnpike</div><div style="font-size:13px;color:var(--muted);font-weight:600">New buyer registration</div></div></div>
+
+<div class="wrap">
+  <div class="ph">
+    <div class="eyebrow">Chunk 1 · Registration</div>
+    <h1>Registration flow — 3 pages</h1>
+    <p>The redesigned signup: page 4 folded into page 3, one distribution center, billing/URL/DBA removed, and a stripped confirmation screen with the pre-launch message.</p>
+    <div class="toggle" id="annoToggle" role="button" tabindex="0" aria-pressed="false"><span class="sw"></span> Show what changed</div>
+  </div>
+
+  <div class="screens">
+
+    <!-- PAGE 1 -->
+    <div class="screen">
+      <p class="screen-tag">Page 1 — Personal account</p>
+      <div class="frame">
+        <div class="title">New Buyer Registration</div>
+        <div class="steps">
+          <div class="step on">1</div><div class="step-line dash"></div>
+          <div class="step">2</div><div class="step-line dash"></div>
+          <div class="step">3</div>
+        </div>
+        <div class="sect">Personal Account Details</div>
+        <div class="row2">
+          <div class="field"><label>First Name <span class="req">*</span></label><div class="input txt">David</div></div>
+          <div class="field"><label>Last Name <span class="req">*</span></label><div class="input txt">Barry</div></div>
+        </div>
+        <div class="field"><label>Email address <span class="req">*</span></label><div class="input txt">accounting@ilevelbrands.com</div></div>
+        <div class="row2">
+          <div class="field"><label>Password <span class="req">*</span></label><div class="input txt">••••••••••••</div></div>
+          <div class="field"><label>Confirm Password <span class="req">*</span></label><div class="input txt">••••••••••••</div></div>
+        </div>
+        <div class="field"><label>Phone <span class="req">*</span></label><div class="input txt">(512) 555-0148</div></div>
+        <div class="actions"><span></span><button class="btn primary">Next →</button></div>
+        <div class="anno"><b>Mostly unchanged.</b> <span class="new">Fix:</span> autofill currently captures first name + email but not last name. Step dots are <b>1-2-3</b> (was 1-2-3-4) and clickable.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="screen">
+      <p class="screen-tag">Page 2 — Store details &amp; shipping</p>
+      <div class="frame">
+        <div class="title">New Buyer Registration</div>
+        <div class="steps">
+          <div class="step on">1</div><div class="step-line on"></div>
+          <div class="step on">2</div><div class="step-line dash"></div>
+          <div class="step">3</div>
+        </div>
+        <div class="sect">Store Details</div>
+        <div class="row2">
+          <div class="field"><label>Store Name <span class="req">*</span></label><div class="input txt">Griffin Natural Market</div></div>
+          <div class="field"><label>Store Type <span class="req">*</span></label><div class="selectish placeholder">Select your store type</div></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Store Size <span class="req">*</span></label><div class="selectish placeholder">Select your store size</div></div>
+          <div class="field"><label>Number of locations <span class="req">*</span></label><div class="selectish placeholder">Select number of locations</div></div>
+        </div>
+
+        <div class="sub">Store Shipping Address</div>
+        <div class="field"><label>Street address <span class="req">*</span></label><div class="input txt">4 Rona Ln</div></div>
+        <div class="row2">
+          <div class="field"><label>City <span class="req">*</span></label><div class="input txt">Franklin</div></div>
+          <div class="field"><label>State <span class="req">*</span></label><div class="selectish txt">Massachusetts</div></div>
+        </div>
+        <div class="field"><label>Zip Code <span class="req">*</span></label><div class="input txt">02038-2563</div></div>
+
+        <div class="actions"><button class="btn ghost">← Back</button><button class="btn primary">Next →</button></div>
+        <div class="anno"><span class="rm">Removed:</span> Website URL field, DBA field, the entire “Legal / Billing Address” block and the “Same as my billing address” checkbox (Turnpike takes no payment), and the <b>Country field</b> (US-only — stored as US, not asked). <br><span class="new">Changed:</span> one <b>store shipping address</b>, reordered <b>street-first</b>. Store Type/Size/locations kept.</div>
+      </div>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div class="screen">
+      <p class="screen-tag">Page 3 — Distribution center + agree + submit</p>
+      <div class="frame">
+        <div class="title">New Buyer Registration</div>
+        <div class="steps">
+          <div class="step on">1</div><div class="step-line on"></div>
+          <div class="step on">2</div><div class="step-line on"></div>
+          <div class="step on">3</div>
+        </div>
+        <div class="sect">Your Distribution Center</div>
+        <div class="dcbox">
+          <div class="row3">
+            <div class="field" style="margin:0"><label>Distributor <span class="req">*</span></label><div class="selectish txt">KeHE</div></div>
+            <div class="field" style="margin:0"><label>Distribution Center <span class="req">*</span></label><div class="selectish txt">Bloomington – DC 16</div></div>
+            <div class="field" style="margin:0"><label>Account Number <span class="req">*</span></label><div class="input txt">87233</div></div>
+          </div>
+        </div>
+        <div class="note-inline">You’ll be able to add more distribution centers after your account is approved.</div>
+
+        <div class="agree">
+          <span class="box"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>
+          <span>I agree to Turnpike’s <a>Terms of Service</a> and <a>Privacy Policy</a> <span class="req">*</span></span>
+        </div>
+        <div class="captcha">
+          <div class="l"><span class="chk"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span> I’m not a robot</div>
+          <div class="rc"><b>reCAPTCHA</b>Privacy · Terms</div>
+        </div>
+
+        <div class="actions"><button class="btn ghost">← Back</button><button class="btn primary">Sign Up</button></div>
+        <div class="anno"><span class="new">Heading renamed</span> from “Default Distribution Center” (no primary/default). <span class="rm">Removed:</span> “Additional Distribution Centers” + “Add Another” button. <br><b>Page 4 folded in here:</b> the one combined Terms/Privacy checkbox, the reCAPTCHA, and Sign Up/submit now live on page 3. Account number treated as alphanumeric.</div>
+      </div>
+    </div>
+
+    <!-- CONFIRMATION -->
+    <div class="screen">
+      <p class="screen-tag">After submit — confirmation (temporary launch copy)</p>
+      <div class="frame">
+        <div class="confirm">
+          <div class="check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <p class="msg">Thanks for registering! Turnpike opens for business before the end of the month — and because you registered early, you’ll be one of the first we notify when it goes live.</p>
+        </div>
+        <div class="anno"><span class="rm">Removed:</span> the benefits/feature row and the entire storefront footer (categories, brands, distributors, logo). <b>Message only.</b> <br><span class="new">Copy:</span> temporary pre-launch message — does not tell the buyer to log in. Same message goes in the “account under review” email. On submit: a loading overlay covers the page and the button disables (prevents double registrations).</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <h3>Summary of changes</h3>
+    <ul>
+      <li><b>4 pages → 3.</b> Page 4 (agreement + reCAPTCHA + Sign Up) folds onto page 3. Step dots are 1-2-3 and clickable.</li>
+      <li><b>Page 2:</b> remove Website URL, DBA, and all billing fields; keep one store shipping address, reordered street-first.</li>
+      <li><b>Page 3:</b> “Your Distribution Center” (no default/primary); exactly one DC (distributor + DC + account #); no “Add Another”; note about adding more after approval; one combined Terms/Privacy checkbox + reCAPTCHA + Sign Up.</li>
+      <li><b>Confirmation:</b> stripped to the message; temporary launch copy; loading overlay + disabled button on submit.</li>
+    </ul>
+  </div>
+  <div class="footy">Turnpike · Chunk 1 registration mockup — visual reference for development, not final styling.</div>
+</div>
+
+<script>
+  const t=document.getElementById('annoToggle');
+  function toggle(){const on=document.body.classList.toggle('anno-on');t.setAttribute('aria-pressed',on);}
+  t.addEventListener('click',toggle);
+  t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+</script>
+</body>
+</html>
