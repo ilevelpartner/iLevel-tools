@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natural Channel Cost-of-Entry Calculator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #0a0a0a;
+    color: #f0f0f0;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  .header {
+    border-bottom: 2px solid #CDFF00;
+    padding-bottom: 16px;
+    margin-bottom: 28px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  .header p {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #f0f0f0;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: #CDFF00;
+  }
+
+  .field select option { background: #1a1a1a; }
+
+  .btn {
+    background: #CDFF00;
+    color: #000;
+    border: none;
+    padding: 12px 28px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    width: 100%;
+    margin-bottom: 28px;
+    transition: background 0.15s;
+  }
+
+  .btn:hover { background: #b8e600; }
+
+  .results { display: none; }
+  .results.visible { display: block; }
+
+  .results-header {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #CDFF00;
+    margin-bottom: 16px;
+  }
+
+  .account-card {
+    background: #111;
+    border: 1px solid #222;
+    border-left: 3px solid #CDFF00;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-radius: 2px;
+  }
+
+  .account-card.warning {
+    border-left-color: #ff6b35;
+  }
+
+  .account-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .account-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 3px;
+  }
+
+  .account-row span:last-child {
+    color: #f0f0f0;
+    font-weight: 600;
+  }
+
+  .account-row.highlight span:last-child {
+    color: #CDFF00;
+    font-size: 13px;
+  }
+
+  .account-row.danger span:last-child {
+    color: #ff6b35;
+  }
+
+  .reset-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin-left: 8px;
+  }
+
+  .reset-low { background: #1a3a1a; color: #4caf50; }
+  .reset-mid { background: #3a2a00; color: #ffc107; }
+  .reset-high { background: #3a0a0a; color: #ff6b35; }
+
+  .summary-bar {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 16px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    text-align: center;
+  }
+
+  .summary-stat label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 4px;
+  }
+
+  .summary-stat .value {
+    font-size: 18px;
+    font-weight: 900;
+    color: #CDFF00;
+  }
+
+  .note {
+    font-size: 11px;
+    color: #555;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #444;
+    margin: 20px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #222;
+  }
+
+  .footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #222;
+    font-size: 11px;
+    color: #444;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Natural Channel Cost-of-Entry Calculator</h1>
+  <p>iLevel Brands · Powered by 1.3M+ rows of distributor data</p>
+</div>
+
+<div class="grid">
+  <div class="field">
+    <label>Case Cost ($)</label>
+    <input type="number" id="caseCost" value="28" min="1" step="0.50">
+  </div>
+  <div class="field">
+    <label>SKUs</label>
+    <input type="number" id="skus" value="2" min="1" max="20">
+  </div>
+  <div class="field">
+    <label>Cases Per Store Per Week</label>
+    <input type="number" id="velocity" value="0.5" min="0.1" step="0.1">
+  </div>
+  <div class="field">
+    <label>Brand Age</label>
+    <select id="brandAge">
+      <option value="new">Under 1 Year</option>
+      <option value="early" selected>1–2 Years</option>
+      <option value="established">3+ Years</option>
+    </select>
+  </div>
+</div>
+
+<button class="btn" onclick="calculate()">Run the Numbers</button>
+
+<div class="results" id="results">
+
+  <div class="summary-bar" id="summaryBar"></div>
+
+  <div class="section-label">Indie Natural — Recommended First</div>
+  <div id="indieSection"></div>
+
+  <div class="section-label">Natural Chains — Tier 2</div>
+  <div id="tier2Section"></div>
+
+  <div class="section-label">Conventional Natural — Tier 3+</div>
+  <div id="tier3Section"></div>
+
+  <p class="note">Reset probabilities reflect brand age at time of chain submission. Indie natural has no reset cliff — velocity compounds year over year. All trade spend estimates based on executed distributor contracts, not estimates.</p>
+
+  <div class="footer">iLevel Brands · shopturnpike.com · 27 years natural channel</div>
+</div>
+
+<script>
+const ACCOUNTS = [
+  // INDIE
+  { name: "Natural Independent (~1,695 stores)", group: "indie", doors: 1695, slottingPerSku: 0, mcbPct: 0.08, oiPct: 0.15, adAnnual: 0, resetProb: { new: 0, early: 0, established: 0 }, notes: "Free fill + 8% MCB yr1. 15% OI to dist 3x yr1. Year 2: MCB via Turnpike only. No reset cliff." },
+  // TIER 2
+  { name: "Sprouts Farmers Market", group: "t2", doors: 420, slottingPerSku: 0, mcbPct: 0.20, oiPct: 0.05, adAnnual: 750, resetProb: { new: 0.70, early: 0.35, established: 0.15 }, notes: "High velocity potential. Aggressive reset for unproven brands." },
+  { name: "Natural Grocers (NGVC)", group: "t2", doors: 167, slottingPerSku: 0, mcbPct: 0.20, oiPct: 0.05, adAnnual: 500, resetProb: { new: 0.60, early: 0.25, established: 0.10 }, notes: "$0 ISS. Core-item filter screens underdeveloped brands." },
+  { name: "PCC Community Markets", group: "t2", doors: 15, slottingPerSku: 0, mcbPct: 0.20, oiPct: 0.05, adAnnual: 350, resetProb: { new: 0.25, early: 0.10, established: 0.05 }, notes: "88% alignment. High velocity. Seattle market." },
+  { name: "Mom's Organic Market", group: "t2", doors: 24, slottingPerSku: 0, mcbPct: 0.20, oiPct: 0.05, adAnnual: 350, resetProb: { new: 0.25, early: 0.10, established: 0.05 }, notes: "DC/MD/VA. Strong natural shopper." },
+  { name: "Earth Fare", group: "t2", doors: 50, slottingPerSku: 0, mcbPct: 0.20, oiPct: 0.05, adAnnual: 500, resetProb: { new: 0.30, early: 0.15, established: 0.08 }, notes: "Southeast/Mid-Atlantic natural chain." },
+  // TIER 3+
+  { name: "Whole Foods Market", group: "t3", doors: 530, slottingPerSku: 5000, mcbPct: 0.25, oiPct: 0.05, adAnnual: 1500, resetProb: { new: 0.90, early: 0.60, established: 0.30 }, notes: "National entry $20K+/SKU all-in. Near-certain reset for brands under 2 years." },
+  { name: "Wegmans", group: "t3", doors: 112, slottingPerSku: 3000, mcbPct: 0.22, oiPct: 0.05, adAnnual: 1200, resetProb: { new: 0.85, early: 0.50, established: 0.20 }, notes: "72% alignment. High execution bar. Most brands already in system — velocity is the issue." },
+  { name: "Publix", group: "t3", doors: 1300, slottingPerSku: 8000, mcbPct: 0.25, oiPct: 0.05, adAnnual: 2000, resetProb: { new: 0.95, early: 0.75, established: 0.40 }, notes: "Conventional mass. Slotting $8K+/SKU. Almost never the right first chain." },
+];
+
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString();
+}
+
+function resetClass(prob) {
+  if (prob <= 0.15) return 'reset-low';
+  if (prob <= 0.45) return 'reset-mid';
+  return 'reset-high';
+}
+
+function resetLabel(prob) {
+  if (prob === 0) return '';
+  return `<span class="reset-badge ${resetClass(prob)}">${Math.round(prob*100)}% reset risk</span>`;
+}
+
+function calculate() {
+  const caseCost = parseFloat(document.getElementById('caseCost').value) || 28;
+  const skus = parseInt(document.getElementById('skus').value) || 2;
+  const velocity = parseFloat(document.getElementById('velocity').value) || 0.5;
+  const ageKey = document.getElementById('brandAge').value;
+
+  const results = ACCOUNTS.map(a => {
+    const weeksPerYear = 52;
+    const grossRevPerDoor = velocity * caseCost * weeksPerYear;
+    const totalGrossRev = grossRevPerDoor * a.doors;
+
+    // Trade calcs
+    const slotting = a.slottingPerSku * skus;
+    const mcb = totalGrossRev * a.mcbPct;
+    const oi = totalGrossRev * a.oiPct * 3; // 3x yr1
+    const adSpend = a.adAnnual * a.doors;
+    const totalTrade = slotting + mcb + oi + adSpend;
+
+    const netRev = totalGrossRev - totalTrade;
+    const tradeAsGross = totalGrossRev > 0 ? (totalTrade / totalGrossRev) * 100 : 0;
+
+    const resetP = a.resetProb[ageKey];
+    const riskAdjNet = netRev * (1 - resetP);
+
+    return { ...a, grossRev: totalGrossRev, slotting, mcb, oi, adSpend, totalTrade, netRev, tradeAsGross, resetP, riskAdjNet };
+  });
+
+  // Summary
+  const indie = results.find(r => r.group === 'indie');
+  const bestChain = results.filter(r => r.group !== 'indie').sort((a,b) => b.riskAdjNet - a.riskAdjNet)[0];
+
+  document.getElementById('summaryBar').innerHTML = `
+    <div class="summary-stat">
+      <label>Indie Net Rev Yr1</label>
+      <div class="value">${fmt(indie.netRev)}</div>
+    </div>
+    <div class="summary-stat">
+      <label>Best Chain Risk-Adj</label>
+      <div class="value">${fmt(bestChain.riskAdjNet)}</div>
+    </div>
+    <div class="summary-stat">
+      <label>Indie Advantage</label>
+      <div class="value">${indie.netRev > 0 && bestChain.riskAdjNet > 0 ? (indie.netRev / bestChain.riskAdjNet).toFixed(1) + 'x' : '—'}</div>
+    </div>
+  `;
+
+  function renderCard(r) {
+    const isWarning = r.resetP >= 0.5;
+    return `
+      <div class="account-card ${isWarning ? 'warning' : ''}">
+        <div class="account-name">${r.name} ${resetLabel(r.resetP)}</div>
+        <div class="account-row"><span>Doors</span><span>${r.doors.toLocaleString()}</span></div>
+        <div class="account-row"><span>Gross Revenue</span><span>${fmt(r.grossRev)}</span></div>
+        ${r.slotting > 0 ? `<div class="account-row"><span>Slotting (${skus} SKUs)</span><span>${fmt(r.slotting)}</span></div>` : ''}
+        <div class="account-row"><span>MCB (${(r.mcbPct*100).toFixed(0)}%)</span><span>${fmt(r.mcb)}</span></div>
+        ${r.oi > 0 ? `<div class="account-row"><span>OI / Bridge (3x yr1)</span><span>${fmt(r.oi)}</span></div>` : ''}
+        ${r.adSpend > 0 ? `<div class="account-row"><span>Ad Programs</span><span>${fmt(r.adSpend)}</span></div>` : ''}
+        <div class="account-row"><span>Total Trade</span><span>${fmt(r.totalTrade)} (${r.tradeAsGross.toFixed(0)}%)</span></div>
+        <div class="account-row highlight"><span>Net Revenue Yr1</span><span>${fmt(r.netRev)}</span></div>
+        ${r.resetP > 0 ? `<div class="account-row danger"><span>Risk-Adjusted Net</span><span>${fmt(r.riskAdjNet)}</span></div>` : ''}
+        <div class="note">${r.notes}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById('indieSection').innerHTML = results.filter(r => r.group === 'indie').map(renderCard).join('');
+  document.getElementById('tier2Section').innerHTML = results.filter(r => r.group === 't2').map(renderCard).join('');
+  document.getElementById('tier3Section').innerHTML = results.filter(r => r.group === 't3').map(renderCard).join('');
+
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
