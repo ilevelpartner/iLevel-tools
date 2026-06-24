@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnpike — Cart Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#E0912E;--orange-deep:#E2611F;--orange-press:#c97e22;
+    --ink:#1f2733;--muted:#6b7280;--faint:#9aa1ac;
+    --line:#e6e7eb;--bg:#f6f6f4;--card:#ffffff;--deal:#15803d;--deal-bg:#e7f6ec;
+    --anno:#b45309;--anno-bg:#fff7ec;--anno-line:#f0d9b5;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 22px rgba(16,24,40,.07);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px 80px}
+  .topbar{background:#fff;border-bottom:1px solid var(--line)}
+  .topbar .in{max-width:1120px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between}
+  .brand{font-weight:800;font-size:22px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--orange),var(--orange-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .keepshop{font-size:13.5px;font-weight:600;color:var(--orange-deep);text-decoration:none}
+  .ph{padding:34px 0 4px}
+  .ph .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange-deep)}
+  .ph h1{font-size:25px;margin:8px 0 4px;letter-spacing:-.02em}
+  .ph p{color:var(--muted);margin:0;max-width:640px}
+  .toggle{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;user-select:none;margin-top:16px}
+  .toggle .sw{width:34px;height:20px;border-radius:999px;background:#d8dbe0;position:relative;transition:.18s}
+  .toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  body.anno-on .toggle .sw{background:var(--orange)}
+  body.anno-on .toggle .sw::after{transform:translateX(14px)}
+
+  .layout{display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:24px;align-items:start}
+  @media(max-width:880px){.layout{grid-template-columns:1fr}}
+
+  .cartbox{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .cartbox .ch{padding:14px 18px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between}
+  .item{display:flex;gap:14px;padding:16px 18px;border-bottom:1px solid #f2f2f0}
+  .item:last-child{border-bottom:none}
+  .ithumb{width:62px;height:62px;border-radius:10px;background:linear-gradient(135deg,#faf7f2,#f0ece4);flex:none;display:flex;align-items:center;justify-content:center}
+  .ithumb svg{width:26px;height:26px;opacity:.3}
+  .iinfo{flex:1;min-width:0}
+  .ibrand{font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+  .iname{font-size:14.5px;font-weight:600;line-height:1.3;margin:1px 0 3px}
+  .ipack{font-size:12px;color:var(--muted)}
+  .route{display:inline-flex;align-items:center;gap:7px;background:#fbfaf8;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--ink);margin-top:8px}
+  .route svg{width:13px;height:13px;stroke:var(--orange-deep);fill:none;stroke-width:1.8;flex:none}
+  .route .dist{color:var(--orange-deep)}
+  .route .only{color:var(--faint);font-weight:500}
+  .routesel{display:inline-flex;align-items:center;gap:7px;margin-top:8px;font-size:12px;color:var(--muted)}
+  .routesel svg{width:13px;height:13px;stroke:var(--orange-deep);fill:none;stroke-width:1.8}
+  select.shipsel{font-family:inherit;font-size:12px;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 24px 5px 9px;background:#fff;appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center}
+  .iright{display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex:none;min-width:132px}
+  .price{text-align:right}
+  .price .pw{font-size:13px;color:var(--muted)}
+  .price .pw .struck{text-decoration:line-through;color:var(--faint)}
+  .price .lt{font-size:16px;font-weight:800;margin-top:1px}
+  .deals{display:flex;gap:5px;justify-content:flex-end;margin-top:5px}
+  .linedisc{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:5px;flex-wrap:wrap}
+  .damt{font-size:12.5px;font-weight:700;color:var(--deal)}
+  .dl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);margin-right:1px}
+  .badge{font-size:10.5px;font-weight:700;color:var(--deal);background:var(--deal-bg);border:1px solid #c9ecd4;padding:2px 7px;border-radius:6px}
+  .badge.total{background:var(--deal);color:#fff;border-color:var(--deal)}
+  .stepper{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .stepper button{width:30px;height:34px;border:none;background:#fff;font-size:17px;cursor:pointer;color:var(--ink)}
+  .stepper input{width:34px;height:34px;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);text-align:center;font-family:inherit;font-weight:600;font-size:14px}
+  .remove{font-size:12px;color:var(--faint);cursor:pointer;border:none;background:none;display:inline-flex;align-items:center;gap:5px}
+  .remove svg{width:13px;height:13px;stroke:var(--faint);fill:none;stroke-width:1.7}
+
+  .summary{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px;position:sticky;top:20px}
+  .summary h3{margin:0 0 16px;font-size:16px}
+  .srow{display:flex;justify-content:space-between;padding:8px 0;font-size:13.5px;color:var(--ink)}
+  .srow.muted{color:var(--muted)}
+  .srow.disc{color:var(--deal);font-weight:600}
+  .srow.tot-disc{border-top:1px dashed var(--line);margin-top:4px;padding-top:11px;font-weight:700;color:var(--deal)}
+  .srow.net{border-top:1px solid var(--line);margin-top:6px;padding-top:13px}
+  .srow.net .nt{font-weight:800;font-size:19px}
+  .srow.net .nl{font-weight:700}
+  .estnote{font-size:11.5px;color:var(--faint);display:flex;gap:6px;margin:12px 0 0}
+  .estnote svg{width:14px;height:14px;stroke:var(--faint);fill:none;stroke-width:1.7;flex:none}
+  .placebtn{width:100%;background:var(--orange);color:#fff;border:none;border-radius:11px;font-family:inherit;font-weight:700;font-size:15px;padding:14px;cursor:pointer;margin-top:16px}
+  .placebtn:hover{background:var(--orange-press)}
+  .nopay{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.45}
+
+  .anno{display:none;font-size:12px;line-height:1.5;color:var(--anno);background:var(--anno-bg);border:1px solid var(--anno-line);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:10px 12px;margin:14px 0 0}
+  body.anno-on .anno{display:block}.anno b{color:#92400e}
+  .footy{margin-top:24px;font-size:12px;color:var(--faint);text-align:center}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in"><div class="brand">Turnpike</div><a class="keepshop">&larr; Keep shopping</a></div></div>
+
+<div class="wrap">
+  <div class="ph">
+    <div class="eyebrow">Project #3 · Cart</div>
+    <h1>Your cart</h1>
+    <p>Items are listed in the order they were added. Each line shows the distributor and DC it routes through; the order is sent to those distributors as turnover(s) when you place it. The OI/MCB deal value is totaled in the summary.</p>
+    <div class="toggle" id="annoToggle" role="button" tabindex="0" aria-pressed="false"><span class="sw"></span> Show how it works</div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="cartbox">
+        <div class="ch"><span>3 items</span><span>Wholesale / case</span></div>
+
+        <!-- item 1 -->
+        <div class="item">
+          <div class="ithumb"><svg viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>
+          <div class="iinfo">
+            <div class="ibrand">Lunchskins</div>
+            <div class="iname">Reusable Sandwich Bags &mdash; Kraft</div>
+            <div class="ipack">Inner pack: 6 &middot; Master case: 6</div>
+            <span class="route"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> <span class="dist">KeHE</span> &middot; Bloomington (DC 16) <span class="only">&middot; only source</span></span>
+          </div>
+          <div class="iright">
+            <div class="price"><div class="pw">$39.00 / case</div><div class="lt">$39.00</div></div>
+            <div class="linedisc"><span class="badge">5% MCB</span><span class="badge total">Total 5%</span></div>
+            <div class="stepper"><button>&minus;</button><input value="1"><button>+</button></div>
+            <button class="remove"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg> Remove</button>
+          </div>
+        </div>
+
+        <!-- item 2 (on deal + multi-DC) -->
+        <div class="item">
+          <div class="ithumb"><svg viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>
+          <div class="iinfo">
+            <div class="ibrand">Skoy</div>
+            <div class="iname">Skoy Scrub &mdash; Eco Dish Scrubber</div>
+            <div class="ipack">Inner pack: 6 &middot; Master case: 6</div>
+            <span class="routesel"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> Routes via
+              <select class="shipsel"><option>KeHE &middot; Bloomington</option><option>UNFI &middot; Moreno Valley</option></select></span>
+          </div>
+          <div class="iright">
+            <div class="price"><div class="pw"><span class="struck">$24.00</span> / case</div><div class="lt">$48.00</div></div>
+            <div class="linedisc"><span class="badge">15% OI</span><span class="badge">35% MCB</span><span class="badge total">Total 50%</span></div>
+            <div class="stepper"><button>&minus;</button><input value="2"><button>+</button></div>
+            <button class="remove"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg> Remove</button>
+          </div>
+        </div>
+
+        <!-- item 3 -->
+        <div class="item">
+          <div class="ithumb"><svg viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>
+          <div class="iinfo">
+            <div class="ibrand">ECOLIPS</div>
+            <div class="iname">Organic Lip Balm &mdash; Vanilla Honey</div>
+            <div class="ipack">Inner pack: 6 &middot; Master case: 6</div>
+            <span class="route"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> <span class="dist">UNFI</span> &middot; Moreno Valley <span class="only">&middot; only source</span></span>
+          </div>
+          <div class="iright">
+            <div class="price"><div class="pw">$28.50 / case</div><div class="lt">$28.50</div></div>
+            <div class="linedisc"><span class="badge">5% MCB</span><span class="badge total">Total 5%</span></div>
+            <div class="stepper"><button>&minus;</button><input value="1"><button>+</button></div>
+            <button class="remove"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg> Remove</button>
+          </div>
+        </div>
+      </div>
+      <div class="anno"><b>Flat list, in the order added.</b> Items are not grouped by distributor. Each line carries its <b>distributor &middot; DC</b> as a single clean chip (not stacked text), and its <b>discount inline</b> &mdash; <b>every item has a default 5% MCB</b>, deal items show more (OI and/or higher MCB). Lines available at one DC show it as &ldquo;only source&rdquo;; lines at 2+ DCs show a <b>Routes via</b> selector. On <b>Place order</b>, the system sends a turnover to each distributor behind the scenes.</div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div>
+      <div class="summary">
+        <h3>Order summary</h3>
+        <div class="srow muted"><span>Wholesale subtotal</span><span>$115.50</span></div>
+        <div class="srow tot-disc"><span>Total deal</span><span>OI + MCB</span></div>
+        <div class="estnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg> OI/MCB deal terms are shown per item and applied on your turnover. Final figures confirm with your DC.</div>
+        <button class="placebtn">Place order &rarr;</button>
+        <div class="nopay">No payment is taken here. Turnpike sends each distributor a turnover on your behalf &mdash; you&rsquo;re billed by the distributor against your account.</div>
+      </div>
+      <div class="anno"><b>Deal shown as terms, not dollars.</b> Each line shows its <b>total deal</b> (OI + MCB); every item has a default 5% MCB. No computed dollar discount or net &mdash; the actual figures settle on the turnover with the distributor. Turnpike isn&rsquo;t the merchant, so there&rsquo;s no payment, tax, or shipping line.</div>
+    </div>
+  </div>
+
+  <div class="footy">Turnpike &middot; Project #3 cart &mdash; visual reference for development, not final styling.</div>
+</div>
+<script>
+  const t=document.getElementById('annoToggle');
+  function tog(){const on=document.body.classList.toggle('anno-on');t.setAttribute('aria-pressed',on);}
+  t.addEventListener('click',tog);
+  t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  document.querySelectorAll('.stepper').forEach(function(s){var i=s.querySelector('input');var b=s.querySelectorAll('button');b[0].onclick=function(){i.value=Math.max(1,(+i.value||1)-1);};b[1].onclick=function(){i.value=(+i.value||0)+1;};});
+</script>
+</body>
+</html>
