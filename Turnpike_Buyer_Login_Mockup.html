@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnpike — Buyer Logged-In Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#E0912E;--orange-deep:#E2611F;--orange-press:#c97e22;
+    --ink:#1f2733;--muted:#6b7280;--faint:#9aa1ac;
+    --line:#e6e7eb;--bg:#f6f6f4;--card:#ffffff;
+    --deal:#15803d;--deal-bg:#e7f6ec;--disc:#6d28d9;
+    --anno:#b45309;--anno-bg:#fff7ec;--anno-line:#f0d9b5;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 4px 16px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .pagewrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+  .ph{padding:38px 0 4px}
+  .ph .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange-deep)}
+  .ph h1{font-size:26px;margin:8px 0 4px;letter-spacing:-.02em}
+  .ph p{color:var(--muted);margin:0;max-width:660px}
+  .toggle{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;user-select:none;margin-top:16px}
+  .toggle .sw{width:34px;height:20px;border-radius:999px;background:#d8dbe0;position:relative;transition:.18s}
+  .toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  body.anno-on .toggle .sw{background:var(--orange)}
+  body.anno-on .toggle .sw::after{transform:translateX(14px)}
+  .screen-tag{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:34px 0 10px}
+
+  /* browser frame */
+  .browser{border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);background:#fff}
+  .chrome{background:#eceef1;padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+  .dot{width:11px;height:11px;border-radius:50%}.dot.r{background:#f56}.dot.y{background:#fb5}.dot.g{background:#3c5}
+  .url{margin-left:10px;background:#fff;border-radius:7px;padding:5px 12px;font-size:12px;color:var(--muted);flex:1}
+
+  /* app header */
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:15px 22px;border-bottom:1px solid var(--line)}
+  .brand{font-weight:800;font-size:22px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--orange),var(--orange-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .nav{display:flex;gap:20px;font-size:14px;font-weight:600;color:var(--ink)}
+  .nav a{color:inherit;text-decoration:none;opacity:.78;cursor:pointer}
+  .nav a.active{opacity:1;color:var(--orange-deep)}
+  .barright{display:flex;align-items:center;gap:16px;font-size:13.5px;font-weight:600;color:var(--ink)}
+  .icbtn{display:inline-flex;align-items:center;gap:7px;cursor:pointer}
+  .icbtn svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:1.8}
+  .cartpill{background:var(--ink);color:#fff;border-radius:999px;padding:7px 14px;display:inline-flex;gap:8px;align-items:center}
+  .cartpill svg{stroke:#fff;width:16px;height:16px;fill:none;stroke-width:1.8}
+
+  /* DC bar */
+  .dcbar{display:flex;align-items:center;gap:12px;padding:13px 22px;background:#fbfaf8;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .dclabel{font-size:12.5px;color:var(--muted);font-weight:600}
+  .pill{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1.5px solid var(--orange);color:var(--ink);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600}
+  .pill .x{color:var(--faint);font-weight:700;cursor:pointer;font-size:15px;line-height:1}
+  .pill.off{border-color:var(--line);color:var(--faint);background:#fff}
+  .adddc{display:inline-flex;align-items:center;gap:6px;border:1px dashed #c9ccd2;color:var(--muted);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer;background:#fff}
+
+  /* body layout */
+  .shop{display:grid;grid-template-columns:212px 1fr;gap:0}
+  @media(max-width:860px){.shop{grid-template-columns:1fr}.rail{display:none}}
+  .rail{border-right:1px solid var(--line);padding:20px 18px}
+  .rail h4{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 10px}
+  .rail .grp{margin-bottom:22px}
+  .rail a{display:block;font-size:13.5px;color:var(--ink);text-decoration:none;padding:5px 0;opacity:.82;cursor:pointer}
+  .rail a.sel{color:var(--orange-deep);font-weight:700;opacity:1}
+
+  .main{padding:20px 22px 26px}
+  .lenses{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .lens{padding:9px 14px;font-size:13.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
+  .lens.active{color:var(--ink);border-bottom-color:var(--orange)}
+  .reorder{background:#fbfaf8;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:20px}
+  .reorder .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+  .reorder .rh b{font-size:14px}
+  .reorder .rh a{font-size:12.5px;color:var(--orange-deep);font-weight:600;text-decoration:none}
+  .rerow{display:flex;gap:10px;overflow:auto}
+  .recard{min-width:150px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 11px}
+  .recard .rn{font-size:12.5px;font-weight:600;line-height:1.3;height:32px;overflow:hidden}
+  .recard .rp{font-size:13px;font-weight:700;margin:6px 0 8px}
+  .recard .rb{font-size:11.5px;font-weight:700;color:#fff;background:var(--orange);border-radius:7px;padding:6px;text-align:center;cursor:pointer}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:1080px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.grid{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+  .thumb{aspect-ratio:1.4/1;background:linear-gradient(135deg,#faf7f2,#f0ece4);display:flex;align-items:center;justify-content:center;position:relative}
+  .thumb svg{width:42px;height:42px;opacity:.3}
+  .ribbon{position:absolute;top:9px;left:9px;font-size:10px;font-weight:700;letter-spacing:.04em;padding:4px 8px;border-radius:999px;text-transform:uppercase;color:#fff}
+  .ribbon.deal{background:var(--deal)}.ribbon.new{background:#0e7490}
+  .cbody{padding:12px 13px 13px;display:flex;flex-direction:column;gap:7px;flex:1}
+  .cbrand{font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+  .cname{font-size:14px;font-weight:600;line-height:1.3;margin:-3px 0 0}
+  .cpack{font-size:11.5px;color:var(--muted)}
+  .cprice{display:flex;align-items:baseline;gap:7px}
+  .cprice .now{font-size:18px;font-weight:800}
+  .cprice .now.struck{font-size:15px;color:var(--faint);text-decoration:line-through}
+  .cprice .u{font-size:11px;color:var(--muted)}
+  .csrp{font-size:12px;color:var(--muted)}.csrp b{color:var(--ink)}
+  .cdeals{display:flex;gap:5px}
+  .cbadge{font-size:10.5px;font-weight:700;color:var(--deal);background:var(--deal-bg);border:1px solid #c9ecd4;padding:2px 7px;border-radius:6px}
+  .cships{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px}
+  .cships svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:1.7;flex:none}
+  .cctrl{margin-top:auto;display:flex;gap:8px;align-items:center;padding-top:4px}
+  .ministep{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .ministep button{width:28px;height:34px;border:none;background:#fff;font-size:16px;cursor:pointer;color:var(--ink)}
+  .ministep input{width:30px;height:34px;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);text-align:center;font-family:inherit;font-weight:600;font-size:14px}
+  .addbtn{flex:1;background:var(--orange);color:#fff;border:none;border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;padding:9px;cursor:pointer}
+  .addbtn:hover{background:var(--orange-press)}
+
+  .anno{display:none;font-size:12px;line-height:1.45;color:var(--anno);background:var(--anno-bg);border:1px solid var(--anno-line);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:9px 12px;margin:12px 0 0}
+  body.anno-on .anno{display:block}.anno b{color:#92400e}
+
+  /* first login modal screen */
+  .modalframe{position:relative;background:linear-gradient(0deg,rgba(31,39,51,.45),rgba(31,39,51,.45));padding:30px;border-radius:16px;border:1px solid var(--line)}
+  .modal{max-width:520px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.25);padding:28px}
+  .modal h3{margin:0 0 4px;font-size:21px;letter-spacing:-.01em}
+  .modal p{margin:0 0 18px;color:var(--muted);font-size:14px}
+  .mrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:560px){.mrow{grid-template-columns:1fr}}
+  .mfield label{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+  .mfield .inp{height:40px;background:#eef1f8;border-radius:999px;display:flex;align-items:center;padding:0 14px;font-size:13px;color:var(--ink)}
+  .mfield .inp.ph{color:var(--faint)}
+  .maddrow{margin-top:12px;font-size:13px;color:var(--orange-deep);font-weight:600;cursor:pointer}
+  .mactions{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+  .mactions .skip{font-size:13.5px;color:var(--muted);font-weight:600;cursor:pointer}
+  .mactions .save{background:var(--orange);color:#fff;border:none;border-radius:999px;font-family:inherit;font-weight:700;font-size:14px;padding:11px 24px;cursor:pointer}
+
+  .legend{margin-top:40px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  .legend h3{margin:0 0 12px;font-size:15px}.legend ul{margin:0;padding-left:18px;color:var(--muted);font-size:13.5px}
+  .legend li{margin:7px 0}.legend b{color:var(--ink)}
+  .footy{margin-top:24px;font-size:12px;color:var(--faint);text-align:center}
+</style>
+</head>
+<body>
+<div class="pagewrap">
+  <div class="ph">
+    <div class="eyebrow">Project #3 · Buyer experience</div>
+    <h1>After approval — buyer logs in</h1>
+    <p>What an approved buyer sees: their DCs load automatically, the catalog is scoped to what they can actually order, and they shop by reorder, category, or brand. ~80% of buyers have one DC, so the common path has zero DC decisions.</p>
+    <div class="toggle" id="annoToggle" role="button" tabindex="0" aria-pressed="false"><span class="sw"></span> Show how it works</div>
+  </div>
+
+  <p class="screen-tag">Returning login — the shop, scoped to their DCs</p>
+  <div class="browser">
+    <div class="chrome"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">shopturnpike.com/shop</span></div>
+
+    <div class="appbar">
+      <div class="brand">Turnpike</div>
+      <div class="nav"><a class="active">Shop</a><a>New</a><a>Sale</a><a>Brands</a><a>Discovery</a></div>
+      <div class="barright">
+        <span class="icbtn"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+        <span class="icbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Hi, David ▾</span>
+        <span class="cartpill"><svg viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg> Cart · 2</span>
+      </div>
+    </div>
+
+    <div class="dcbar">
+      <span class="dclabel">Shopping from:</span>
+      <span class="pill">KeHE · Bloomington (DC 16) <span class="x" title="Floor: can't remove your only DC">×</span></span>
+      <span class="adddc">+ Add a DC</span>
+    </div>
+    <div class="anno" style="margin:0 22px 14px">On login the buyer’s saved DCs <b>hydrate automatically</b> (no re-selecting). DC pills are <b>view toggles</b>, not navigation — turning one off filters the view without touching membership or the cart. A single-DC buyer sees one pill; the last DC can’t be removed (floor of 1). “Add a DC” opens the selector + account-number modal. No primary/default.</div>
+
+    <div class="shop">
+      <div class="rail">
+        <div class="grp"><h4>Browse</h4>
+          <a class="sel">All products</a><a>Health</a><a>Household</a><a>Personal Care</a><a>Pantry</a><a>Baby &amp; Kids</a>
+        </div>
+        <div class="grp"><h4>Brands</h4>
+          <a>Lunchskins</a><a>Skoy</a><a>ECOLIPS</a><a>Artigiani Dei Sapori</a><a>Whitestone</a>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="lenses"><span class="lens active">All products</span><span class="lens">New arrivals</span><span class="lens">On sale</span><span class="lens">Discovery</span></div>
+
+        <div class="reorder">
+          <div class="rh"><b>Your reorders</b><a>View order history →</a></div>
+          <div class="rerow">
+            <div class="recard"><div class="rn">Lunchskins Sandwich Bags — Kraft</div><div class="rp">$39.00 <span style="font-size:10px;color:var(--muted);font-weight:500">/ case</span></div><div class="rb">Reorder</div></div>
+            <div class="recard"><div class="rn">Skoy Scrub — Eco Dish Scrubber</div><div class="rp">$24.00 <span style="font-size:10px;color:var(--muted);font-weight:500">/ case</span></div><div class="rb">Reorder</div></div>
+            <div class="recard"><div class="rn">ECOLIPS Lip Balm — Vanilla Honey</div><div class="rp">$28.50 <span style="font-size:10px;color:var(--muted);font-weight:500">/ case</span></div><div class="rb">Reorder</div></div>
+          </div>
+        </div>
+        <div class="anno" style="margin-top:0;margin-bottom:18px"><b>Reorder-first.</b> Buyers navigate by what they buy — past orders surface up top for one-tap reorder, then category / brand / search. DCs are a setting, not a nav path.</div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="thumb"><svg viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>
+            <div class="cbody">
+              <div class="cbrand">Lunchskins</div><p class="cname">Reusable Sandwich Bags — Kraft</p>
+              <div class="cpack">Inner pack: 6 · Master case: 6</div>
+              <div class="cprice"><span class="now">$39.00</span><span class="u">/ case</span></div>
+              <div class="csrp">SRP <b>$9.99</b> / unit</div>
+              <div class="cships"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> Ships via KeHE · Bloomington</div>
+              <div class="cctrl"><span class="ministep"><button>−</button><input value="1"><button>+</button></span><button class="addbtn">Add to cart</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="thumb"><span class="ribbon deal">On deal</span><svg viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>
+            <div class="cbody">
+              <div class="cbrand">Skoy</div><p class="cname">Skoy Scrub — Eco Dish Scrubber</p>
+              <div class="cpack">Inner pack: 6 · Master case: 6</div>
+              <div class="cprice"><span class="now struck">$24.00</span><span class="u">/ case</span></div>
+              <div class="cdeals"><span class="cbadge">15% OI</span><span class="cbadge">35% MCB</span></div>
+              <div class="csrp">SRP <b>$5.99</b> / unit</div>
+              <div class="cships"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> Ships via KeHE · Bloomington</div>
+              <div class="cctrl"><span class="ministep"><button>−</button><input value="2"><button>+</button></span><button class="addbtn">Add to cart</button></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="thumb"><span class="ribbon new">New</span><svg viewBox="0 0 24 24" fill="none" stroke="#caa" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>
+            <div class="cbody">
+              <div class="cbrand">ECOLIPS</div><p class="cname">Organic Lip Balm — Vanilla Honey</p>
+              <div class="cpack">Inner pack: 6 · Master case: 6</div>
+              <div class="cprice"><span class="now">$28.50</span><span class="u">/ case</span></div>
+              <div class="csrp">SRP <b>$3.99</b> / unit</div>
+              <div class="cships"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="18.5" r="2"/></svg> Ships via KeHE · Bloomington</div>
+              <div class="cctrl"><span class="ministep"><button>−</button><input value="1"><button>+</button></span><button class="addbtn">Add to cart</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="anno"><b>Scoped catalog.</b> Only products available at the buyer’s held DCs appear — no false affordances. Cards lead with wholesale (their cost), SRP as a benchmark, deal terms strike the price, and routing shows inline because it’s a single-DC buyer.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRST LOGIN -->
+  <p class="screen-tag">First login only — add your distribution centers (skippable)</p>
+  <div class="modalframe">
+    <div class="modal">
+      <h3>Welcome to Turnpike, David</h3>
+      <p>Add the distribution centers you order through. You can skip and add them anytime from your account.</p>
+      <div class="mrow">
+        <div class="mfield"><label>Distributor</label><div class="inp">KeHE</div></div>
+        <div class="mfield"><label>Distribution Center</label><div class="inp">Bloomington – DC 16</div></div>
+        <div class="mfield"><label>Account Number</label><div class="inp">87233</div></div>
+      </div>
+      <div class="maddrow">+ Add another distribution center</div>
+      <div class="mactions"><span class="skip">Skip for now</span><button class="save">Save &amp; start shopping</button></div>
+    </div>
+  </div>
+  <div class="anno"><b>First login after approval only.</b> The buyer registered with one DC; this one-time prompt invites the rest. It reuses the same selector + account-number modal as “Add a DC”. Skippable — a returning buyer never sees it and lands straight on the shop above.</div>
+
+  <div class="legend">
+    <h3>What happens on login</h3>
+    <ul>
+      <li><b>DCs hydrate automatically</b> — saved (distributor, DC, account #) load into the session; no re-selecting.</li>
+      <li><b>First time:</b> a skippable prompt to add more DCs. <b>Every time after:</b> straight to the shop.</li>
+      <li><b>Catalog is scoped</b> to the union of products at their held DCs — they only see what they can order.</li>
+      <li><b>Navigate by product</b> — reorders first, then category / brand / search. DC pills are view toggles, not navigation; the last DC can’t be removed.</li>
+      <li><b>Cards</b> follow WS3 — wholesale-led pricing, SRP benchmark, deal strike, inline routing for single-DC buyers.</li>
+    </ul>
+  </div>
+  <div class="footy">Turnpike · Project #3 buyer experience — visual reference for development, not final styling.</div>
+</div>
+<script>
+  const t=document.getElementById('annoToggle');
+  function tog(){const on=document.body.classList.toggle('anno-on');t.setAttribute('aria-pressed',on);}
+  t.addEventListener('click',tog);
+  t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tog();}});
+  document.querySelectorAll('.ministep').forEach(s=>{const i=s.querySelector('input');const[d,u]=s.querySelectorAll('button');d.onclick=()=>i.value=Math.max(1,(+i.value||1)-1);u.onclick=()=>i.value=(+i.value||0)+1;});
+</script>
+</body>
+</html>
