@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ShelfIQ — Indie Optimization</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#F6F4F0; --card:#FFFFFF; --card2:#F0EDE8; --bd:#E2DDD8; --ink:#1F2733; --mut:#6B7280;
+  --orange:#E0912E; --orange2:#C97B1E; --green:#15803d; --red:#dc2626; --teal:#0d9488; --purple:#7c3aed;
+  --lime:#4ade80; --amber:#f59e0b;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)!important;min-height:100%}
+body{margin:0;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 64px;min-height:100vh}
+header.top{background:#ffffff;border-bottom:2px solid var(--orange);
+  margin:0 -20px 0;padding:22px 28px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.brandrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pill{background:var(--orange);color:#fff;font-weight:800;
+  padding:7px 16px;border-radius:30px;font-size:13px;letter-spacing:.5px}
+h1{font-size:20px;font-weight:700;margin:0;color:var(--ink)}
+.sub{color:var(--mut);font-size:12.5px;margin-top:3px}
+.tabs{display:flex;gap:4px;margin-top:18px;flex-wrap:wrap}
+.tab{background:transparent;border:0;border-bottom:3px solid transparent;color:var(--mut);
+  padding:11px 16px;font-size:13.5px;font-weight:600;cursor:pointer;transition:color .15s}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--orange);border-bottom-color:var(--orange)}
+section.view{display:none;padding-top:24px}
+section.view.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.kpi .n{font-size:30px;font-weight:800;line-height:1.1}
+.kpi .l{color:var(--mut);font-size:12px;margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h3{margin:0 0 4px;font-size:14px;color:var(--ink);font-weight:700}
+.card .cap{color:var(--mut);font-size:12px;margin:0 0 14px}
+.chartbox{position:relative;height:300px}
+.insight{background:#FFF8F0;border:1px solid #F5DEB3;border-left:3px solid var(--orange);
+  border-radius:8px;padding:12px 15px;font-size:13px;color:var(--ink);margin-top:16px}
+.insight b{color:var(--orange2)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--bd)}
+th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;background:#FAFAF8}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.tag.A,.tag.Core{background:#FFF3E0;color:#b45309;border:1px solid #fcd34d}
+.tag.B,.tag.Differentiator{background:#EFF6FF;color:#1d4ed8;border:1px solid #bfdbfe}
+.tag.C{background:#FEF3C7;color:#92400e;border:1px solid #fde68a}
+.tag.D,.tag.Prune{background:#F3F4F6;color:#6b7280;border:1px solid #d1d5db}
+.tag.grp{background:#ECFDF5;color:#065f46;border:1px solid #a7f3d0}
+select{background:var(--card);color:var(--ink);border:1px solid var(--bd);border-radius:8px;
+  padding:9px 12px;font-size:13.5px;min-width:300px;max-width:100%;outline:none}
+select:focus{border-color:var(--orange)}
+.storehead{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 6px}
+.stat{background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;min-width:120px}
+.stat .n{font-size:22px;font-weight:800;color:var(--ink)}.stat .l{color:var(--mut);font-size:11.5px;margin-top:3px}
+.bar{height:8px;border-radius:6px;background:var(--bd);overflow:hidden;margin-top:8px}
+.bar > i{display:block;height:100%;background:var(--orange);border-radius:6px}
+.scroll{max-height:520px;overflow:auto}
+.muted{color:var(--mut)} .why{color:var(--mut);font-size:12px;margin-top:2px}
+.note{color:var(--mut);font-size:11.5px;margin-left:auto;align-self:center}
+@media(max-width:880px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}select{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brandrow">
+    <span class="pill" id="brandPill">BRAND</span>
+    <div><h1>ShelfIQ — Indie Optimization Dashboard</h1>
+    <div class="sub">Independent natural channel · built from your KeHE + UNFI sell-through</div></div>
+    <span class="note">Powered by iLevel Brands · shopturnpike.com</span>
+  </div>
+  <div class="tabs">
+    <button class="tab on" data-v="coverage">Where you are</button>
+    <button class="tab" data-v="line">Your line</button>
+    <button class="tab" data-v="fix">Fix the mix</button>
+    <button class="tab" data-v="assort">Assortment by size</button>
+  </div>
+</header>
+
+<section class="view on" id="coverage">
+  <div class="kpis" id="covKpis"></div>
+  <div class="grid2">
+    <div class="card"><h3>Coverage by door size</h3>
+      <p class="cap">Where you're in vs. the whitespace still open, by how big the door is</p>
+      <div class="chartbox"><canvas id="covChart"></canvas></div></div>
+    <div class="card"><h3>Reading it</h3><p class="cap">What the pattern says</p>
+      <div id="covInsight"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Top doors by your volume</h3>
+    <p class="cap">Your biggest independent accounts — ranked A–D by your dollars in the door</p>
+    <div class="scroll"><table id="storeTable"></table></div></div>
+</section>
+
+<section class="view" id="line">
+  <div class="kpis" id="lineKpis"></div>
+  <div class="grid2">
+    <div class="card"><h3>Line architecture</h3>
+      <p class="cap">Where revenue actually comes from — grow the core, prune the tail</p>
+      <div class="chartbox"><canvas id="archChart"></canvas></div></div>
+    <div class="card"><h3>ACV headroom on your movers</h3>
+      <p class="cap">Current distribution (filled) vs. room to a 75% target (open)</p>
+      <div class="chartbox"><canvas id="acvChart"></canvas></div></div>
+  </div>
+  <div class="insight" id="lineInsight"></div>
+</section>
+
+<section class="view" id="fix">
+  <p class="cap" style="margin-bottom:8px">Pick a door to see how it's assorted for its size — and the proven items it's missing.</p>
+  <select id="storeSel"></select>
+  <div class="storehead" id="fixHead"></div>
+  <div class="card" style="margin-top:10px"><h3>Fix the mix — proven items this door isn't carrying</h3>
+    <p class="cap" id="fixCap"></p>
+    <div class="scroll"><table id="fixTable"></table></div></div>
+</section>
+
+<section class="view" id="assort">
+  <div class="grid2">
+    <div class="card"><h3>Optimal assortment by store size</h3>
+      <p class="cap">How many SKUs a store should carry — from look-alike top performers</p>
+      <div class="chartbox"><canvas id="sizeChart"></canvas></div></div>
+    <div class="card"><h3>Recommended set</h3>
+      <p class="cap">For a store of this size, lead with these — highest velocity first</p>
+      <select id="bandSel"></select>
+      <div id="bandHint" style="margin:12px 0 4px"></div>
+      <div class="scroll" style="max-height:380px"><table id="coreTable"></table></div></div>
+  </div>
+</section>
+</div>
+
+<script>
+const DATA={"brand": "ALAFFIA", "coverage": {"universe": 3554, "inn": 1056, "pct": 30, "toTarget": 2498, "byRank": [{"rank": "A", "inn": 418, "total": 783, "pct": 53}, {"rank": "B", "inn": 331, "total": 912, "pct": 36}, {"rank": "C", "inn": 205, "total": 956, "pct": 21}, {"rank": "D", "inn": 102, "total": 903, "pct": 11}]}, "topStores": [{"rank": "A", "ilevel": 9988, "name": "Shop-N-Kart - Ashland", "city": "Ashland", "state": "OR", "group": "", "dollars": 158139}, {"rank": "A", "ilevel": 883, "name": "Clark's Nutrition - Loma Linda", "city": "Loma Linda", "state": "CA", "group": "", "dollars": 108196}, {"rank": "A", "ilevel": 722, "name": "Jimbo's - Carmel Valley", "city": "San Diego", "state": "CA", "group": "INFRA", "dollars": 97735}, {"rank": "A", "ilevel": 703, "name": "Mother's Market - Costa Mesa", "city": "Costa Mesa", "state": "CA", "group": "", "dollars": 95465}, {"rank": "A", "ilevel": 9990, "name": "Ashland Food Cooperative", "city": "Ashland", "state": "OR", "group": "NCG", "dollars": 94981}, {"rank": "A", "ilevel": 30, "name": "Natural Pantry", "city": "Anchorage", "state": "AK", "group": "INFRA", "dollars": 94884}, {"rank": "A", "ilevel": 10141, "name": "Lifesource Natural Foods", "city": "Salem", "state": "OR", "group": "INFRA", "dollars": 82661}, {"rank": "A", "ilevel": 1191, "name": "Rainbow Grocery - San Francisco", "city": "San Francisco", "state": "CA", "group": "INFRA", "dollars": 81018}, {"rank": "A", "ilevel": 12648, "name": "Community Food Co-Op - Bellingham", "city": "Bellingham", "state": "WA", "group": "NCG", "dollars": 78818}, {"rank": "A", "ilevel": 657, "name": "Jimbo's - Carlsbad", "city": "Carlsbad", "state": "CA", "group": "INFRA", "dollars": 75950}, {"rank": "A", "ilevel": 8689, "name": "Park Slope Co-Op", "city": "Brooklyn", "state": "NY", "group": "NCG", "dollars": 74349}, {"rank": "A", "ilevel": 12861, "name": "Marlene's - Tacoma", "city": "Tacoma", "state": "WA", "group": "INFRA", "dollars": 72755}, {"rank": "A", "ilevel": 626, "name": "Berkeley Bowl West", "city": "Berkeley", "state": "CA", "group": "", "dollars": 70004}, {"rank": "A", "ilevel": 7242, "name": "Good Food Store", "city": "Missoula", "state": "MT", "group": "INFRA", "dollars": 68684}, {"rank": "A", "ilevel": 12689, "name": "Marlene's - Federal Way", "city": "Federal Way", "state": "WA", "group": "INFRA", "dollars": 64067}, {"rank": "A", "ilevel": 12773, "name": "The Food Co-Op - Port Townsend", "city": "Port Townsend", "state": "WA", "group": "NCG", "dollars": 63980}, {"rank": "A", "ilevel": 25093, "name": "MOM's Organic Market - Hampden", "city": "Baltimore", "state": "MD", "group": "", "dollars": 63152}, {"rank": "A", "ilevel": 7168, "name": "Community Food Co-Op - Bozeman", "city": "Bozeman", "state": "MT", "group": "NCG", "dollars": 62072}, {"rank": "A", "ilevel": 1068, "name": "Clark's Nutrition - Rancho Mirage", "city": "Rancho Mirage", "state": "CA", "group": "", "dollars": 60316}, {"rank": "A", "ilevel": 15766, "name": "Mother's Market - Laguna Woods", "city": "Laguna Woods", "state": "CA", "group": "", "dollars": 58571}, {"rank": "B", "ilevel": 4499, "name": "Bloomingfoods - 6th St", "city": "Bloomington", "state": "IN", "group": "NCG", "dollars": 9176}], "lineArch": {"Core": {"n": 17, "revpct": 47}, "Differentiator": {"n": 23, "revpct": 30}, "Prune": {"n": 47, "revpct": 22}}, "skus": [{"desc": "Pure Unrefined Shea Butter, Unscented", "cat": "Body Butters & Oils", "tier": "Core", "vel": 19.2, "acv": 61, "carry": 484, "gap": 661, "price": 8.4}, {"desc": "Body Wash 32fz EveryDay Shea, Lavender", "cat": "Body Wash", "tier": "Core", "vel": 18.4, "acv": 68, "carry": 539, "gap": 606, "price": 7.16}, {"desc": "Body Lotion 32fz EveryDay Shea, Unscented", "cat": "Body Lotion", "tier": "Core", "vel": 15.5, "acv": 68, "carry": 554, "gap": 591, "price": 6.8}, {"desc": "Body Wash 32fz EveryDay Shea, Unscented", "cat": "Body Wash", "tier": "Core", "vel": 17.7, "acv": 63, "carry": 460, "gap": 685, "price": 7.16}, {"desc": "Body Lotion 32fz EveryDay Shea, Lavender", "cat": "Body Lotion", "tier": "Core", "vel": 13.2, "acv": 69, "carry": 549, "gap": 596, "price": 6.8}, {"desc": "Body Wash 32fz EveryDay Shea, Vanilla Mint", "cat": "Body Wash", "tier": "Core", "vel": 16.3, "acv": 56, "carry": 392, "gap": 753, "price": 7.16}, {"desc": "EveryDay Coconut 32fz, Shampoo Purely Coconut", "cat": "Hair Care", "tier": "Differentiator", "vel": 13.7, "acv": 58, "carry": 433, "gap": 712, "price": 7.2}, {"desc": "Body Wash 32fz EveryDay Coconut, Purely Coconut", "cat": "Body Wash", "tier": "Differentiator", "vel": 15.1, "acv": 52, "carry": 384, "gap": 761, "price": 7.16}, {"desc": "EveryDay Shea 32fz, Shampoo Lavender", "cat": "Hair Care", "tier": "Core", "vel": 12.1, "acv": 60, "carry": 439, "gap": 706, "price": 7.2}, {"desc": "Body Lotion 32fz EveryDay Coconut, Purely Coconut", "cat": "Body Lotion", "tier": "Differentiator", "vel": 12.1, "acv": 61, "carry": 463, "gap": 682, "price": 6.8}, {"desc": "EveryDay Shea Bubble Bath, Lavender", "cat": "Specialty/Bubble Bath", "tier": "Core", "vel": 15.8, "acv": 41, "carry": 264, "gap": 881, "price": 6.1}, {"desc": "Beautiful Curls, Curl Defining Gel", "cat": "Textured Hair Care", "tier": "Differentiator", "vel": 10.3, "acv": 45, "carry": 288, "gap": 857, "price": 8.1}, {"desc": "All In One 32fz, ABS Unscented", "cat": "All In One Liquid Soap", "tier": "Core", "vel": 11.7, "acv": 43, "carry": 291, "gap": 854, "price": 7.0}, {"desc": "Beautiful Curls, Curl Enhancing Leave-In", "cat": "Textured Hair Care", "tier": "Differentiator", "vel": 10.8, "acv": 43, "carry": 302, "gap": 843, "price": 7.2}, {"desc": "Babies & Kids Bubble Bath, Lemon Lavender", "cat": "Babies & Kids", "tier": "Core", "vel": 11.0, "acv": 46, "carry": 334, "gap": 811, "price": 6.1}], "coreList": [{"desc": "Pure Unrefined Shea Butter, Unscented", "cat": "Body Butters & Oils", "tier": "Core", "vel": 19.2, "acv": 61}, {"desc": "Body Wash 32fz EveryDay Shea, Lavender", "cat": "Body Wash", "tier": "Core", "vel": 18.4, "acv": 68}, {"desc": "Body Wash 32fz EveryDay Shea, Unscented", "cat": "Body Wash", "tier": "Core", "vel": 17.7, "acv": 63}, {"desc": "Body Wash 32fz EveryDay Shea, Vanilla Mint", "cat": "Body Wash", "tier": "Core", "vel": 16.3, "acv": 56}, {"desc": "EveryDay Shea Bubble Bath, Lavender", "cat": "Specialty/Bubble Bath", "tier": "Core", "vel": 15.8, "acv": 41}, {"desc": "Body Wash 32fz EveryDay Coconut, Purely Coconut", "cat": "Body Wash", "tier": "Differentiator", "vel": 15.1, "acv": 52}, {"desc": "Body Lotion 32fz EveryDay Shea, Unscented", "cat": "Body Lotion", "tier": "Core", "vel": 15.5, "acv": 68}, {"desc": "EveryDay Coconut 32fz, Shampoo Purely Coconut", "cat": "Hair Care", "tier": "Differentiator", "vel": 13.7, "acv": 58}, {"desc": "Body Lotion 32fz EveryDay Shea, Lavender", "cat": "Body Lotion", "tier": "Core", "vel": 13.2, "acv": 69}, {"desc": "All In One 32fz, ABS Eucalyptus Tea Tree", "cat": "All In One Liquid Soap", "tier": "Core", "vel": 13.1, "acv": 27}, {"desc": "EveryDay Shea 32fz, Shampoo Lavender", "cat": "Hair Care", "tier": "Core", "vel": 12.1, "acv": 60}, {"desc": "Body Lotion 32fz EveryDay Coconut, Purely Coconut", "cat": "Body Lotion", "tier": "Differentiator", "vel": 12.1, "acv": 61}, {"desc": "All In One 32fz, ABS Unscented", "cat": "All In One Liquid Soap", "tier": "Core", "vel": 11.7, "acv": 43}, {"desc": "Whipped Shea Butter 1.5oz Travel", "cat": "Body Butters & Oils", "tier": "Core", "vel": 11.9, "acv": 5}, {"desc": "Babies & Kids Bubble Bath, Lemon Lavender", "cat": "Babies & Kids", "tier": "Core", "vel": 11.0, "acv": 46}], "stores": [{"sid": "8689", "name": "Park Slope Co-Op", "band": "XL", "size": 114553, "cur": 14, "opt": 43, "action": "ADD", "gap": 32, "items": [{"sku": "EveryDay Shea Bubble Bath, Lavender", "cat": "Specialty/Bubble Bath", "tier": "Core", "why": "Top mover, carried broadly — completes your core set.", "ea": 5, "price": 6.1, "rank": 1}, {"sku": "All In One 32fz, ABS Rosewater Peony", "cat": "All In One Liquid Soap", "tier": "Differentiator", "why": "Indie favorite — chains rarely stock it.", "ea": 4, "price": 7.0, "rank": 2}, {"sku": "All In One 32fz, ABS Eucalyptus Tea Tree", "cat": "All In One Liquid Soap", "tier": "Core", "why": "Top mover, carried broadly — completes your core set.", "ea": 4, "price": 7.0, "rank": 3}, {"sku": "All In One 32fz, ABS Wild Lavender", "cat": "All In One Liquid Soap", "tier": "Differentiator", "why": "Indie favorite — chains rarely stock it.", "ea": 4, "price": 7.0, "rank": 4}, {"sku": "ABS Triple Milled Soap, Unscented 5oz", "cat": "Bar Soap", "tier": "Differentiator", "why": "Indie favorite — chains rarely stock it.", "ea": 5, "price": 3.25, "rank": 5}]}, {"sid": "883", "name": "Clark's Nutrition - Loma Linda", "band": "XL", "size": 88593, "cur": 17, "opt": 43, "action": "ADD", "gap": 28, "items": [{"sku": "EveryDay Shea Bubble Bath, Lavender", "cat": "Specialty/Bubble Bath", "tier": "Core", "why": "Top mover, carried broadly — completes your core set.", "ea": 5, "price": 6.1, "rank": 1}, {"sku": "ABS Triple Milled Soap, Unscented 5oz", "cat": "Bar Soap", "tier": "Differentiator", "why": "Indie favorite — chains rarely stock it.", "ea": 5, "price": 3.25, "rank": 2}, {"sku": "Bar Soap, ABS Triple Milled Charcoal Reishi", "cat": "Bar Soap", "tier": "Differentiator", "why": "Indie favorite — chains rarely stock it.", "ea": 4, "price": 3.25, "rank": 3}]}], "sizeOptimal": {"XS (smallest 20%)": 8, "S": 15, "M": 23, "L": 31, "XL (largest 20%)": 43}};
+
+const C={orange:'#E0912E',orange2:'#C97B1E',green:'#15803d',red:'#dc2626',teal:'#0d9488',purple:'#7c3aed',mut:'#9CA3AF',bd:'#E2DDD8',ink:'#1F2733'};
+Chart.defaults.color=C.mut;Chart.defaults.borderColor=C.bd;Chart.defaults.font.family='Inter,-apple-system,Segoe UI,Roboto,Arial';
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const money=n=>'$'+Math.round(n).toLocaleString();
+
+document.getElementById('brandPill').textContent=DATA.brand;
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');document.getElementById(t.dataset.v).classList.add('on');
+});
+
+/* COVERAGE */
+const cov=DATA.coverage;
+[[(cov.universe).toLocaleString(),'independent doors in the universe',C.ink],
+ [(cov.inn).toLocaleString(),'doors you\'re in today',C.orange],
+ [cov.pct+'%','overall coverage',C.green],
+ [(cov.toTarget).toLocaleString(),'doors still open to you','#b45309']
+].forEach(k=>{const d=el('div','kpi');
+  d.appendChild(el('div','n',k[0]));d.querySelector('.n').style.color=k[2];d.appendChild(el('div','l',k[1]));$('#covKpis').appendChild(d)});
+
+const SIZE={A:'Largest',B:'Large',C:'Mid',D:'Small'};
+new Chart($('#covChart'),{type:'bar',data:{labels:cov.byRank.map(r=>SIZE[r.rank]+' doors'),
+ datasets:[{label:'In',data:cov.byRank.map(r=>r.inn),backgroundColor:C.orange,borderRadius:5},
+           {label:'Still open',data:cov.byRank.map(r=>r.total-r.inn),backgroundColor:'#E8E3DC',borderRadius:5}]},
+ options:{maintainAspectRatio:false,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:C.bd}}},
+   plugins:{legend:{position:'top'},tooltip:{callbacks:{afterBody:(it)=>{const r=cov.byRank[it[0].dataIndex];return r.pct+'% covered'}}}}}});
+
+$('#covInsight').innerHTML=
+ '<div class="insight">You\'re in <b>'+cov.byRank[0].pct+'% of the largest doors</b> but only <b>'+cov.byRank[3].pct+'% of the smallest</b>. '
+ +'That\'s the classic mature-brand shape: strong where volume is obvious, thin where coverage takes effort.</div>'
+ +'<div class="insight" style="border-left-color:#15803d;background:#f0fdf4;border-color:#a7f3d0">The cheapest growth is the <b>'+(cov.byRank[1].total-cov.byRank[1].inn+cov.byRank[2].total-cov.byRank[2].inn).toLocaleString()
+ +' open large and mid-size doors</b> — comparable to stores already reordering you. Breadth before you chase the long tail.</div>';
+
+const stbody=$('#storeTable');
+stbody.innerHTML='<thead><tr><th>Rank</th><th>Store</th><th>Location</th><th>Group</th><th class="num">Your $</th></tr></thead>';
+const tb=el('tbody');DATA.topStores.forEach(s=>{const tr=el('tr');
+ tr.innerHTML='<td><span class="tag '+s.rank+'">'+s.rank+'</span></td><td>'+s.name+'</td>'
+ +'<td class="muted">'+s.city+', '+s.state+'</td><td>'+(s.group?'<span class="tag grp">'+s.group+'</span>':'<span class="muted">—</span>')+'</td>'
+ +'<td class="num">'+money(s.dollars)+'</td>';tb.appendChild(tr)});stbody.appendChild(tb);
+
+/* LINE */
+const la=DATA.lineArch, coreN=(la.Core?.n||0)+(la.Differentiator?.n||0), coreRev=(la.Core?.revpct||0)+(la.Differentiator?.revpct||0);
+[[DATA.skus.length,'SKUs in the catalog',C.ink],
+ [coreN,'core + differentiator SKUs',C.orange],
+ [coreRev+'%','of revenue from those '+coreN,C.green],
+ [(la.Prune?.n||0),'tail SKUs to prune ('+(la.Prune?.revpct||0)+'% of rev)',C.mut]
+].forEach(k=>{const d=el('div','kpi');
+  d.appendChild(el('div','n',k[0]));d.querySelector('.n').style.color=k[2];d.appendChild(el('div','l',k[1]));$('#lineKpis').appendChild(d)});
+
+new Chart($('#archChart'),{type:'doughnut',data:{labels:['Core ('+la.Core.n+')','Differentiator ('+la.Differentiator.n+')','Prune ('+la.Prune.n+')'],
+ datasets:[{data:[la.Core.revpct,la.Differentiator.revpct,la.Prune.revpct],backgroundColor:[C.orange,'#F5C58A','#E8E3DC'],borderColor:'#fff',borderWidth:3}]},
+ options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom'},
+  tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'% of revenue'}}}}});
+
+const movers=DATA.skus.filter(s=>s.tier!=='Prune').sort((a,b)=>b.vel-a.vel).slice(0,12);
+new Chart($('#acvChart'),{type:'bar',data:{labels:movers.map(s=>s.desc.length>26?s.desc.slice(0,25)+'…':s.desc),
+ datasets:[{label:'Today',data:movers.map(s=>s.acv),backgroundColor:C.orange,borderRadius:4,stack:'a'},
+           {label:'Headroom to 75%',data:movers.map(s=>Math.max(0,75-s.acv)),backgroundColor:'#F0EDE8',borderRadius:4,stack:'a'}]},
+ options:{indexAxis:'y',maintainAspectRatio:false,scales:{x:{stacked:true,max:80,grid:{color:C.bd},ticks:{callback:v=>v+'%'}},y:{stacked:true,grid:{display:false}}},
+  plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.x+(c.dataset.label==='Today'?'% ACV':'%')}}}}});
+
+$('#lineInsight').innerHTML='<b>'+coreN+' SKUs drive '+coreRev+'% of your independent revenue.</b> '
+ +'The 75% target line shows the cheapest growth isn\'t new items — it\'s getting the movers you already have into more of the doors that should carry them.';
+
+/* FIX THE MIX */
+const sel=$('#storeSel');
+DATA.stores.forEach((s,i)=>{const o=el('option');o.value=i;o.textContent=s.name+'  ·  '+s.band+'  ·  '+money(s.size);sel.appendChild(o)});
+function renderFix(i){const s=DATA.stores[i];
+ $('#fixHead').innerHTML=
+  '<div class="stat"><div class="n">'+s.band+'</div><div class="l">size band ('+money(s.size)+')</div></div>'
+ +'<div class="stat"><div class="n">'+s.cur+' / '+s.opt+'</div><div class="l">SKUs carried vs. optimal</div>'
+   +'<div class="bar"><i style="width:'+Math.min(100,Math.round(100*s.cur/s.opt))+'%"></i></div></div>'
+ +'<div class="stat"><div class="n" style="color:'+C.orange+'">'+s.gap+'</div><div class="l">SKUs below optimal</div></div>'
+ +'<div class="stat"><div class="n" style="color:'+C.green+'">'+s.action+'</div><div class="l">recommended move</div></div>';
+ $('#fixCap').textContent='Sized in eaches, deal-ready — '+s.items.length+' picks, highest priority first.';
+ const t=$('#fixTable');t.innerHTML='<thead><tr><th>#</th><th>Item</th><th>Category</th><th>Tier</th><th class="num">Eaches</th><th class="num">Price</th></tr></thead>';
+ const tb2=el('tbody');s.items.forEach(it=>{const tr=el('tr');
+  tr.innerHTML='<td class="muted">'+it.rank+'</td><td>'+it.sku+'<div class="why">'+it.why+'</div></td>'
+  +'<td class="muted">'+it.cat+'</td><td><span class="tag '+it.tier+'">'+it.tier+'</span></td>'
+  +'<td class="num">+'+it.ea+'</td><td class="num">$'+it.price.toFixed(2)+'</td>';tb2.appendChild(tr)});t.appendChild(tb2);}
+sel.onchange=()=>renderFix(+sel.value);renderFix(0);
+
+/* ASSORTMENT */
+const so=DATA.sizeOptimal, bands=Object.keys(so);
+new Chart($('#sizeChart'),{type:'bar',data:{labels:bands.map(b=>b.replace(/ \(.*\)/,'')),
+ datasets:[{label:'Optimal SKU count',data:bands.map(b=>so[b]),backgroundColor:C.orange,borderRadius:6}]},
+ options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:C.bd}},x:{grid:{display:false}}}}});
+
+const bs=$('#bandSel');bands.forEach(b=>{const o=el('option');o.value=b;o.textContent=b+' — carry ~'+so[b]+' SKUs';bs.appendChild(o)});
+function renderBand(b){const n=so[b];const list=DATA.coreList.slice(0,n);
+ $('#bandHint').innerHTML='<div class="insight">A <b>'+b.replace(/ \(.*\)/,'')+'</b> store should carry about <b>'+n+' SKUs</b>. Lead with these — your highest-velocity core and differentiators.</div>';
+ const t=$('#coreTable');t.innerHTML='<thead><tr><th>#</th><th>Item</th><th>Tier</th><th class="num">Velocity</th><th class="num">ACV</th></tr></thead>';
+ const tb3=el('tbody');list.forEach((s,i)=>{const tr=el('tr');
+  tr.innerHTML='<td class="muted">'+(i+1)+'</td><td>'+s.desc+'<div class="why">'+s.cat+'</div></td>'
+  +'<td><span class="tag '+s.tier+'">'+s.tier+'</span></td><td class="num">'+s.vel+'</td><td class="num">'+s.acv+'%</td>';tb3.appendChild(tr)});t.appendChild(tb3);}
+bs.value=bands[2];bs.onchange=()=>renderBand(bs.value);renderBand(bands[2]);
+</script>
+</body>
+</html>
