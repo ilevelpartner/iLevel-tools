@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ShelfIQ — Indie Optimization</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f3ef; --card:#ffffff; --card2:#faf8f4; --bd:#e8e3d9; --ink:#20201d; --mut:#77736b;
+  --orange:#e1822e; --orange-deep:#c56c1e; --indigo:#e1822e; --cyan:#2e9e5b; --amber:#d99a2e; --green:#2e9e5b; --red:#d9534f; --grey:#e2ddd1;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)!important;min-height:100%}
+body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 64px;min-height:100vh}
+header.top{background:#ffffff;border-bottom:1px solid var(--bd);
+  margin:0 -20px 0;padding:22px 28px 0}
+.brandrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pill{background:var(--orange);color:#ffffff;font-weight:800;
+  padding:7px 16px;border-radius:30px;font-size:13px;letter-spacing:.5px}
+h1{font-size:20px;font-weight:700;margin:0}
+.sub{color:var(--mut);font-size:12.5px;margin-top:3px}
+.tabs{display:flex;gap:4px;margin-top:18px;flex-wrap:wrap}
+.tab{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--mut);
+  padding:11px 16px;font-size:13.5px;font-weight:600;cursor:pointer}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--orange)}
+section.view{display:none;padding-top:24px}
+section.view.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px 18px}
+.kpi .n{font-size:30px;font-weight:800;line-height:1.1}
+.kpi .l{color:var(--mut);font-size:12px;margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px}
+.card h3{margin:0 0 4px;font-size:14px}
+.card .cap{color:var(--mut);font-size:12px;margin:0 0 14px}
+.chartbox{position:relative;height:300px}
+.insight{background:var(--card2);border:1px solid var(--bd);border-left:3px solid var(--orange);
+  border-radius:10px;padding:12px 15px;font-size:13px;color:#3a382f;margin-top:16px}
+.insight b{color:var(--orange-deep)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--bd)}
+th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.tag.A,.tag.Core{background:rgba(225,130,46,.15);color:#b5641a}
+.tag.B,.tag.Differentiator{background:rgba(46,158,91,.15);color:#237344}
+.tag.C{background:rgba(217,154,46,.18);color:#946614}
+.tag.D,.tag.Prune{background:rgba(120,115,107,.15);color:#6b675f}
+.tag.grp{background:rgba(46,158,91,.12);color:#237344}
+select{background:var(--card2);color:var(--ink);border:1px solid var(--bd);border-radius:9px;
+  padding:9px 12px;font-size:13.5px;min-width:300px;max-width:100%}
+.storehead{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 6px}
+.stat{background:var(--card2);border:1px solid var(--bd);border-radius:11px;padding:12px 16px;min-width:120px}
+.stat .n{font-size:22px;font-weight:800}.stat .l{color:var(--mut);font-size:11.5px;margin-top:3px}
+.bar{height:9px;border-radius:6px;background:var(--bd);overflow:hidden;margin-top:8px}
+.bar > i{display:block;height:100%;background:linear-gradient(90deg,#e1822e,#e89b4e)}
+.scroll{max-height:520px;overflow:auto}
+.muted{color:var(--mut)} .why{color:var(--mut);font-size:12px}
+.note{color:var(--mut);font-size:11.5px;margin-left:auto;align-self:center}
+.bandsel{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.bandbtn{background:var(--card2);border:1px solid var(--bd);color:var(--mut);border-radius:9px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.bandbtn:hover{color:var(--ink);border-color:var(--orange)}
+.bandbtn.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.bandbtn .bc{font-size:10.5px;font-weight:700;opacity:.65}
+.flabel{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);font-weight:700;margin-bottom:7px}
+.kpis.k3{grid-template-columns:repeat(3,1fr)}
+.valwrap{display:inline-flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:96px}
+.valbar{width:96px;height:6px;background:var(--bd);border-radius:4px;overflow:hidden}
+.valbar > i{display:block;height:100%;background:linear-gradient(90deg,#e1822e,#e89b4e)}
+.lever-intro{max-width:780px;line-height:1.5}
+@media(max-width:880px){.kpis{grid-template-columns:repeat(2,1fr)}.kpis.k3{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}select{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brandrow">
+    <span class="pill" id="brandPill">BRAND</span>
+    <div><h1>Indie Optimization Dashboard</h1>
+    <div class="sub">Independent natural channel · built from your KeHE + UNFI sell-through</div></div>
+    <span class="note">Template — swap in any brand's coverage &amp; sell-through</span>
+  </div>
+  <div class="tabs">
+    <button class="tab on" data-v="coverage">Where you are</button>
+    <button class="tab" data-v="place">Place</button>
+    <button class="tab" data-v="add">Add</button>
+    <button class="tab" data-v="swap">Swap</button>
+  </div>
+</header>
+
+<!-- COVERAGE -->
+<section class="view on" id="coverage">
+  <div class="kpis" id="covKpis"></div>
+  <div class="grid2">
+    <div class="card"><h3>Coverage by door size</h3>
+      <p class="cap">Where you're in vs. the whitespace still open, by how big the door is</p>
+      <div class="chartbox"><canvas id="covChart"></canvas></div></div>
+    <div class="card"><h3>Reading it</h3><p class="cap">What the pattern says</p>
+      <div id="covInsight"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Your accounts &mdash; dollars vs. penetration</h3>
+    <p class="cap">Ranked A&ndash;D by your dollars in the door (Q1 2023). Penetration = your share of everything that door buys. <span style="color:#d9534f">Red</span> = big door, small share = your nearest growth.</p>
+    <div class="scroll"><table id="storeTable"></table></div>
+    <div class="insight" id="penInsight" style="border-left-color:#d9534f;margin-top:14px"></div></div>
+</section>
+
+<!-- PLACE -->
+<section class="view" id="place">
+  <p class="cap lever-intro" id="placeIntro" style="margin-bottom:14px;font-size:13.5px"></p>
+  <div class="kpis k3" id="placeKpis"></div>
+  <div class="card" style="margin-top:4px"><h3>Do these first &mdash; ranked by projected value</h3>
+    <p class="cap">Highest-value opportunities at the top &mdash; work straight down the list.</p>
+    <div class="scroll"><table id="placeTable"></table></div></div>
+</section>
+
+<!-- ADD -->
+<section class="view" id="add">
+  <p class="cap lever-intro" id="addIntro" style="margin-bottom:14px;font-size:13.5px"></p>
+  <div class="kpis k3" id="addKpis"></div>
+  <div class="card" style="margin-top:4px"><h3>Do these first &mdash; ranked by projected value</h3>
+    <p class="cap">Highest-value opportunities at the top &mdash; work straight down the list.</p>
+    <div class="scroll"><table id="addTable"></table></div></div>
+</section>
+
+<!-- SWAP -->
+<section class="view" id="swap">
+  <p class="cap lever-intro" id="swapIntro" style="margin-bottom:14px;font-size:13.5px"></p>
+  <div class="kpis k3" id="swapKpis"></div>
+  <div class="card" style="margin-top:4px"><h3>Do these first &mdash; ranked by projected value</h3>
+    <p class="cap">Highest-value upgrades at the top &mdash; work straight down the list.</p>
+    <div class="scroll"><table id="swapTable"></table></div></div>
+</section>
+</div>
+
+<script>
+const DATA={"brand": "Health Plus", "coverage": {"universe": 3554, "inn": 876, "pct": 25, "toTarget": 2678, "byRank": [{"rank": "A", "inn": 435, "total": 889, "pct": 49}, {"rank": "B", "inn": 305, "total": 888, "pct": 34}, {"rank": "C", "inn": 104, "total": 889, "pct": 12}, {"rank": "D", "inn": 32, "total": 888, "pct": 4}]}, "topStores": [{"rank": "A", "name": "Manna Health Pitkin", "group": "", "al": 21789, "doorvol": 197643, "pen": 11}, {"rank": "A", "name": "Healthland", "group": "", "al": 14847, "doorvol": 105654, "pen": 14}, {"rank": "A", "name": "HerbMart Mesquite", "group": "", "al": 10751, "doorvol": 13000, "pen": 83}, {"rank": "A", "name": "The Health Dude", "group": "", "al": 10300, "doorvol": 35905, "pen": 29}, {"rank": "A", "name": "Bj's - Victorville", "group": "", "al": 8098, "doorvol": 21523, "pen": 38}, {"rank": "A", "name": "Clark's Nutrition - Loma Lind", "group": "", "al": 7004, "doorvol": 88593, "pen": 8}, {"rank": "A", "name": "Down To Earth - Pearlridge", "group": "", "al": 6677, "doorvol": 33969, "pen": 20}, {"rank": "A", "name": "Granary #4 - Plano", "group": "", "al": 5300, "doorvol": 11578, "pen": 46}, {"rank": "A", "name": "Rainbow Grocery -San Francisco", "group": "INFRA", "al": 5286, "doorvol": 117560, "pen": 4}, {"rank": "A", "name": "Mother's Market - Costa Mesa", "group": "", "al": 4141, "doorvol": 63243, "pen": 7}, {"rank": "A", "name": "Organic Roots - Temecula", "group": "", "al": 4085, "doorvol": 31424, "pen": 13}, {"rank": "A", "name": "S & S Produce", "group": "", "al": 4068, "doorvol": 17384, "pen": 23}, {"rank": "A", "name": "Downtown Natural Market- Jackons's Heights", "group": "", "al": 4028, "doorvol": 13465, "pen": 30}, {"rank": "A", "name": "Ann's Health Food Center - Zang", "group": "INFRA", "al": 3837, "doorvol": 19458, "pen": 20}, {"rank": "A", "name": "Down To Earth Honolulu", "group": "", "al": 3727, "doorvol": 23081, "pen": 16}, {"rank": "A", "name": "Co-Opportunity Market - Santa Monica", "group": "NCG", "al": 3408, "doorvol": 34301, "pen": 10}, {"rank": "A", "name": "Clark's Nutrition - Rancho Mirage", "group": "", "al": 3338, "doorvol": 34071, "pen": 10}, {"rank": "A", "name": "Williams Natural Foods", "group": "", "al": 3055, "doorvol": 9062, "pen": 34}, {"rank": "A", "name": "Tower Health Foods", "group": "", "al": 2907, "doorvol": 5696, "pen": 51}, {"rank": "A", "name": "Natural Pantry", "group": "INFRA", "al": 2894, "doorvol": 37800, "pen": 8}, {"rank": "A", "name": "Mother's Market - Huntington Beach", "group": "", "al": 2825, "doorvol": 26035, "pen": 11}, {"rank": "A", "name": "Down To Earth - Kapolei", "group": "", "al": 2778, "doorvol": 24890, "pen": 11}, {"rank": "A", "name": "Olive May Health Foods", "group": "INFRA", "al": 2654, "doorvol": 8324, "pen": 32}, {"rank": "A", "name": "Garner's Natural Life - Pleasantburg", "group": "", "al": 2594, "doorvol": 9690, "pen": 27}, {"rank": "A", "name": "Natural Nutrition Center- Miami", "group": "", "al": 2408, "doorvol": 2572, "pen": 94}, {"rank": "A", "name": "Nature's Health Food & Cafe", "group": "", "al": 2258, "doorvol": 5316, "pen": 42}, {"rank": "A", "name": "Down To Earth - Keawe St", "group": "", "al": 2252, "doorvol": 21022, "pen": 11}, {"rank": "A", "name": "Village Health Foods - Modesto", "group": "", "al": 2234, "doorvol": 8228, "pen": 27}, {"rank": "A", "name": "Health Food City - Pasadena", "group": "", "al": 2230, "doorvol": 3806, "pen": 59}, {"rank": "A", "name": "Major Health Food", "group": "", "al": 2061, "doorvol": 2759, "pen": 75}, {"rank": "A", "name": "Vitamin Plus - Lafayette", "group": "", "al": 2056, "doorvol": 43447, "pen": 5}, {"rank": "A", "name": "One Stop Nutrition -48Th", "group": "", "al": 2051, "doorvol": 2051, "pen": 100}, {"rank": "A", "name": "Health Unlimited - SAN LEANDRO", "group": "", "al": 2005, "doorvol": 7470, "pen": 27}, {"rank": "A", "name": "Mother's Market - Santa Ana", "group": "", "al": 2000, "doorvol": 33278, "pen": 6}, {"rank": "A", "name": "WESTERLY NATURAL MARKET", "group": "", "al": 1955, "doorvol": 12168, "pen": 16}, {"rank": "A", "name": "Mana Foods", "group": "", "al": 1939, "doorvol": 43846, "pen": 4}, {"rank": "A", "name": "Hojas Para Medicina", "group": "", "al": 1922, "doorvol": 3123, "pen": 62}, {"rank": "A", "name": "Sonshine Nutrition Center", "group": "INFRA", "al": 1922, "doorvol": 2276, "pen": 84}, {"rank": "A", "name": "Ocean Beach People's Organic Food Market", "group": "NCG", "al": 1888, "doorvol": 18285, "pen": 10}, {"rank": "A", "name": "Vitamin Plus - Lubbock", "group": "", "al": 1880, "doorvol": 27165, "pen": 7}], "levers": {"place": [{"il": 46, "name": "Co-Op Market Grocery & Deli", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8243, "name": "La Montanita Co-Op (Valley)", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8248, "name": "La Montanita Co-Op (Nob Hill)", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 32837, "name": "Lexington Coop -Buffalo", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 57415, "name": "Mother's Market - Hollywood", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 57445, "name": "DOM'S KITCHEN AND MARKET - Wells", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 57451, "name": "MOM's Organic Market - Burlington", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8306, "name": "La Montanita Co-Op (Santa Fe)", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8387, "name": "Great Basin Food Co-Op", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8403, "name": "Honest Weight Coop", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8446, "name": "Sherry's Place", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 24852, "name": "HUDSON COUNTY MKT", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 300, "name": "Manna Grocery & Deli", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 41262, "name": "Erewhon Market - Santa Monica", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 334, "name": "Ozark Natural Foods Nl", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 49581, "name": "Healthy Living Market- Williston", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8689, "name": "Park Slope Co-Op", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 25093, "name": "MOM's Organic Market - Hampden", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 49694, "name": "Staff of Life - Watsonville", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 562, "name": "Food Conspiracy", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 586, "name": "Barons Market Alpine", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 602, "name": "Wildberries Marketplace", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 603, "name": "North Coast Co-Op -Arcata", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 623, "name": "Berkeley Bowl", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8815, "name": "Nature's Pantry- Fishkill", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8834, "name": "Natural Food", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8860, "name": "Hawthorne Valley Farm Store", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8861, "name": "Rising Tide Natural Foods - Glen Cove", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 721, "name": "Davis Food Co-Op", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 743, "name": "North Coast Co-Op - Eureka", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 41775, "name": "Earth Fare Williamsburg", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 842, "name": "Woodlands Market", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 861, "name": "Nature's Food Center", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 894, "name": "Vicente Foods", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 909, "name": "Erewhon Market - Los Angles", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 50090, "name": "MOM's Organic Market - Dobbs Ferry", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 957, "name": "Berryvale Grocery", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 50144, "name": "SOULBERRY MARKET - SPRING LAKE", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 1010, "name": "Jensens Finest Foods - Palm Desert", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 17404, "name": "Jensens Finest Foods - Blue Jay", "rank": "A", "n": 3, "val": 272, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}], "add": [{"il": 52423, "name": "Manna Health Pitkin", "rank": "A", "n": 3, "val": 13073, "skus": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 2466, "name": "Healthland", "rank": "A", "n": 3, "val": 8908, "skus": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 23349, "name": "The Health Dude", "rank": "A", "n": 3, "val": 5150, "skus": ["Colon Cleanse, Original Powder 12oz", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 16018, "name": "Bj's - Victorville", "rank": "A", "n": 3, "val": 4049, "skus": ["Super Colon Cleanse 120 CAP", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 15630, "name": "Down To Earth - Pearlridge", "rank": "A", "n": 3, "val": 4006, "skus": ["Super Colon Cleanse 240 CAP", "Colon Cleanse, Original Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 2926, "name": "Rollin' Oats Market - St Petersburg", "rank": "A", "n": 3, "val": 3375, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 29455, "name": "One Stop Nutrition -48Th", "rank": "C", "n": 3, "val": 3077, "skus": ["Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 16000, "name": "Organic Roots - Temecula", "rank": "A", "n": 3, "val": 3064, "skus": ["Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 8311, "name": "Cids Food Market", "rank": "A", "n": 3, "val": 2806, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 3591, "name": "Down To Earth Kailua", "rank": "A", "n": 3, "val": 2691, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 1280, "name": "Co-Opportunity Market - Santa Monica", "rank": "A", "n": 3, "val": 2556, "skus": ["Super Colon Cleanse 120 CAP", "Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 676, "name": "S & S Produce", "rank": "A", "n": 3, "val": 2441, "skus": ["Super Colon Cleanse 120 CAP", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 758, "name": "Down Home Foods-C\\O Stanley", "rank": "C", "n": 3, "val": 2250, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 15616, "name": "Down To Earth Honolulu", "rank": "A", "n": 3, "val": 2236, "skus": ["Super Colon Cleanse 240 CAP", "Colon Cleanse, Original Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 15629, "name": "Down To Earth - Kapolei", "rank": "A", "n": 3, "val": 2084, "skus": ["Super Colon Cleanse 240 CAP", "Colon Cleanse, Original Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 742, "name": "Eureka Natural Foods - Broadway", "rank": "A", "n": 3, "val": 1943, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 1164, "name": "Ocean Beach People's Organic Food Market", "rank": "A", "n": 3, "val": 1888, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse 120 CAP", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 32520, "name": "HerbMart Mesquite", "rank": "A", "n": 1, "val": 1792, "skus": ["Psyllium Husk, Bulk 25LBS"]}, {"il": 883, "name": "Clark's Nutrition - Loma Lind", "rank": "A", "n": 2, "val": 1751, "skus": ["Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 12822, "name": "Sunny Farms", "rank": "A", "n": 3, "val": 1736, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8942, "name": "Downtown Natural Market- Jackons's Heights", "rank": "A", "n": 3, "val": 1726, "skus": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 10528, "name": "Sonnewald Natural Foods", "rank": "A", "n": 3, "val": 1642, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 9990, "name": "Ashland Food Cooperative", "rank": "A", "n": 3, "val": 1632, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 8997, "name": "Long Island Health Foods (DBA Bobs Natural Foods)", "rank": "B", "n": 3, "val": 1620, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 3361, "name": "Farmers Natural Foods", "rank": "A", "n": 3, "val": 1603, "skus": ["Colon Cleanse, Original Powder 12oz", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 30968, "name": "Earth Wise Vitamins", "rank": "B", "n": 3, "val": 1594, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 10132, "name": "Cornucopia Natural Foods-Redmond", "rank": "C", "n": 3, "val": 1590, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 10825, "name": "Garner's Natural Life - Pleasantburg", "rank": "A", "n": 3, "val": 1557, "skus": ["Super Colon Cleanse 240 CAP", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 26333, "name": "Sage Health Food Market", "rank": "B", "n": 3, "val": 1555, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Psyllium Husk, Bulk 25LBS"]}, {"il": 988, "name": "Farmer Joe's Market Place - Fruitdale", "rank": "A", "n": 3, "val": 1511, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 3613, "name": "Mana Foods", "rank": "A", "n": 3, "val": 1454, "skus": ["Super Colon Cleanse 240 CAP", "Colon Cleanse, Original Powder 12oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 28873, "name": "Sonshine Nutrition Center", "rank": "B", "n": 3, "val": 1441, "skus": ["Super Colon Cleanse, Powder 12oz", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 19175, "name": "Nourishme", "rank": "C", "n": 3, "val": 1417, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 11713, "name": "Vitamin Plus - Lubbock", "rank": "A", "n": 3, "val": 1410, "skus": ["Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz", "Psyllium Husk, Bulk 25LBS"]}, {"il": 8438, "name": "NATURAL FRONTIER - ASTORIA", "rank": "A", "n": 3, "val": 1389, "skus": ["Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 3588, "name": "Down To Earth Kahului", "rank": "A", "n": 3, "val": 1358, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse 120 CAP", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 1019, "name": "Paso Robles Health Foods", "rank": "B", "n": 3, "val": 1287, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 774, "name": "Tower Health Foods", "rank": "B", "n": 3, "val": 1246, "skus": ["Super Colon Cleanse, Powder 12oz", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 2664, "name": "Peggy's Discount Hlth", "rank": "C", "n": 3, "val": 1244, "skus": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz", "Colon Cleanse, Original Powder 12oz"]}, {"il": 15870, "name": "Orchard Nutrition - Redding", "rank": "A", "n": 3, "val": 1235, "skus": ["Super Colon Cleanse 120 CAP", "Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}], "swap": [{"il": 52423, "name": "Manna Health Pitkin", "rank": "A", "n": 1, "val": 2179, "drop": ["Colon Cleanse, Original Powder 48oz"], "addin": ["Psyllium Husk, Bulk 25LBS"]}, {"il": 23349, "name": "The Health Dude", "rank": "A", "n": 2, "val": 1717, "drop": ["Kidney Cleanse 60 CAP", "Colon Cleanse Flavors, Orange Powder 9oz"], "addin": ["Colon Cleanse, Original Powder 12oz", "Psyllium Husk, Bulk 25LBS"]}, {"il": 2466, "name": "Healthland", "rank": "A", "n": 1, "val": 1485, "drop": ["Super Colon Cleanse 60 CAP"], "addin": ["Psyllium Husk, Bulk 25LBS"]}, {"il": 16018, "name": "Bj's - Victorville", "rank": "A", "n": 2, "val": 1350, "drop": ["Kidney Cleanse 60 CAP", "Liver Detox 60 CAP"], "addin": ["Super Colon Cleanse 120 CAP", "Psyllium Husk, Bulk 25LBS"]}, {"il": 883, "name": "Clark's Nutrition - Loma Lind", "rank": "A", "n": 2, "val": 875, "drop": ["Colon Cleanse, Original 200 CAP", "Liver Detox 60 CAP"], "addin": ["Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 676, "name": "S & S Produce", "rank": "A", "n": 2, "val": 814, "drop": ["Colon Cleanse, Original 200 CAP", "Colon Cleanse Flavors, Orange Powder 9oz"], "addin": ["Super Colon Cleanse 120 CAP", "Psyllium Husk, Bulk 25LBS"]}, {"il": 15630, "name": "Down To Earth - Pearlridge", "rank": "A", "n": 1, "val": 668, "drop": ["Colon Cleanse Flavors, Orange Powder 9oz"], "addin": ["Super Colon Cleanse 240 CAP"]}, {"il": 8942, "name": "Downtown Natural Market- Jackons's Heights", "rank": "A", "n": 2, "val": 575, "drop": ["Colon Cleanse, Original 200 CAP", "Colon Cleanse Flavors, Orange Powder 9oz"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 9990, "name": "Ashland Food Cooperative", "rank": "A", "n": 2, "val": 544, "drop": ["Prebiotic Formula 180 CAP", "Blood Cleanse 90 CAP"], "addin": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz"]}, {"il": 10825, "name": "Garner's Natural Life - Pleasantburg", "rank": "A", "n": 2, "val": 519, "drop": ["Colon Cleanse Flavors, Orange Powder 9oz", "Colon Cleanse, Original Powder 48oz"], "addin": ["Super Colon Cleanse 240 CAP", "Psyllium Husk, Bulk 25LBS"]}, {"il": 29455, "name": "One Stop Nutrition -48Th", "rank": "C", "n": 1, "val": 513, "drop": ["Colon Cleanse, Original Powder 48oz"], "addin": ["Super Colon Cleanse, Powder 12oz"]}, {"il": 1019, "name": "Paso Robles Health Foods", "rank": "B", "n": 2, "val": 429, "drop": ["Kidney Cleanse 60 CAP", "Liver Detox 60 CAP"], "addin": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz"]}, {"il": 774, "name": "Tower Health Foods", "rank": "B", "n": 2, "val": 415, "drop": ["Colon Cleanse, Organic Powder 12oz", "Kidney Cleanse 60 CAP"], "addin": ["Super Colon Cleanse, Powder 12oz", "Psyllium Husk, Bulk 25LBS"]}, {"il": 703, "name": "Mother's Market - Costa Mesa", "rank": "A", "n": 2, "val": 414, "drop": ["Liver Detox 60 CAP", "Colon Cleanse, Original 200 CAP"], "addin": ["Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 7919, "name": "Olive May Health Foods", "rank": "A", "n": 2, "val": 379, "drop": ["Super Colon Cleanse 60 CAP", "Colon Cleanse Flavors, Powder Pineapple 9oz"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 37367, "name": "Down To Earth - Keawe St", "rank": "A", "n": 2, "val": 375, "drop": ["Colon Cleanse Flavors, Powder Strawberry 9oz", "Colon Cleanse Flavors, Powder Pineapple 9oz"], "addin": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz"]}, {"il": 15616, "name": "Down To Earth Honolulu", "rank": "A", "n": 1, "val": 373, "drop": ["Colon Cleanse Flavors, Orange Powder 9oz"], "addin": ["Super Colon Cleanse 240 CAP"]}, {"il": 5044, "name": "Vitamin Plus - Lafayette", "rank": "A", "n": 2, "val": 343, "drop": ["Super Colon Cleanse, Night Formula 60 CAP", "Colon Cleanse, Original 200 CAP"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 15846, "name": "Nature's Health Food & Cafe", "rank": "B", "n": 2, "val": 323, "drop": ["Liver Detox 60 CAP", "Kidney Cleanse 60 CAP"], "addin": ["Super Colon Cleanse, Powder 12oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 15850, "name": "Health Food City - Pasadena", "rank": "B", "n": 2, "val": 319, "drop": ["Colon Cleanse Flavors, Powder Strawberry 9oz", "Colon Cleanse, Original Powder 48oz"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 15753, "name": "Mother's Market - Huntington Beach", "rank": "A", "n": 2, "val": 314, "drop": ["Super Colon Cleanse 60 CAP", "Liver Detox 60 CAP"], "addin": ["Pure Psyllium Husk, Bag 24oz", "Pure Psyllium Husk, Bag 12oz"]}, {"il": 1191, "name": "Rainbow Grocery -San Francisco", "rank": "A", "n": 1, "val": 294, "drop": ["Liver Detox 60 CAP"], "addin": ["Pure Psyllium Husk, Bag 24oz"]}, {"il": 19683, "name": "HIGHLANDS ORGANIC MARKET -KENNEWICK", "rank": "B", "n": 2, "val": 285, "drop": ["Colon Cleanse Flavors, Powder Pineapple 9oz", "Liver Detox 60 CAP"], "addin": ["Colon Cleanse, Original Powder 12oz", "Psyllium Husk, Bulk 25LBS"]}, {"il": 1068, "name": "Clark's Nutrition - Rancho Mirage", "rank": "A", "n": 1, "val": 278, "drop": ["Colon Cleanse, Original 200 CAP"], "addin": ["Pure Psyllium Husk, Bag 24oz"]}, {"il": 10528, "name": "Sonnewald Natural Foods", "rank": "A", "n": 1, "val": 274, "drop": ["Super Colon Cleanse, Night Formula 60 CAP"], "addin": ["Super Colon Cleanse 240 CAP"]}, {"il": 1703, "name": "Nature's Way Health Foods", "rank": "B", "n": 2, "val": 269, "drop": ["Colon Cleanse, Original 200 CAP", "Colon Cleanse, Original Powder 48oz"], "addin": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz"]}, {"il": 26333, "name": "Sage Health Food Market", "rank": "B", "n": 1, "val": 259, "drop": ["Colon Cleanse, Original Powder 48oz"], "addin": ["Super Colon Cleanse 240 CAP"]}, {"il": 1257, "name": "Mother's Market - Santa Ana", "rank": "A", "n": 2, "val": 250, "drop": ["Super Colon Cleanse 60 CAP", "Colon Cleanse, Original 200 CAP"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 2413, "name": "Natural Nutrition Center- Miami", "rank": "B", "n": 2, "val": 241, "drop": ["Every Day Fiber, Original 12oz", "Colon Cleanse Flavors, Powder Strawberry 9oz"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 28873, "name": "Sonshine Nutrition Center", "rank": "B", "n": 1, "val": 240, "drop": ["Colon Cleanse, Original 200 CAP"], "addin": ["Super Colon Cleanse, Powder 12oz"]}, {"il": 26517, "name": "Sue's Health Food-Yucca Val Kd", "rank": "B", "n": 2, "val": 238, "drop": ["Colon Cleanse, Original 200 CAP", "Liver Detox 60 CAP"], "addin": ["Super Colon Cleanse, Powder 12oz", "Super Colon Cleanse 120 CAP"]}, {"il": 3975, "name": "Southtown Health Foods", "rank": "A", "n": 2, "val": 225, "drop": ["Kidney Cleanse 60 CAP", "Prebiotic Formula 180 CAP"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 24866, "name": "Health Unlimited - SAN LEANDRO", "rank": "A", "n": 2, "val": 223, "drop": ["Blood Cleanse 90 CAP", "Prebiotic Formula 180 CAP"], "addin": ["Colon Cleanse, Original Powder 12oz", "Psyllium Husk, Bulk 25LBS"]}, {"il": 10914, "name": "Bay Naturals Myrtle Beach", "rank": "A", "n": 2, "val": 214, "drop": ["Every Day Fiber, Original 12oz", "Super Colon Cleanse 60 CAP"], "addin": ["Super Colon Cleanse 240 CAP", "Colon Cleanse, Original Powder 12oz"]}, {"il": 2732, "name": "Nutrition S'Mart -Pembrooke Pines", "rank": "A", "n": 2, "val": 213, "drop": ["Super Colon Cleanse 60 CAP", "Colon Cleanse Flavors, Orange Powder 9oz"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 9681, "name": "Weber Health Foods", "rank": "C", "n": 2, "val": 212, "drop": ["Herbal Detox+, 10 Day Cleanse 40 CAP", "Super Colon Cleanse 60 CAP"], "addin": ["Colon Cleanse, Original Powder 12oz", "Psyllium Husk, Bulk 25LBS"]}, {"il": 682, "name": "Sprouts (Independent) - Eastlake Pkwy", "rank": "A", "n": 2, "val": 204, "drop": ["Colon Cleanse, Original 200 CAP", "Liver Detox 60 CAP"], "addin": ["Psyllium Husk, Bulk 25LBS", "Pure Psyllium Husk, Bag 24oz"]}, {"il": 15810, "name": "Village Health Foods - Modesto", "rank": "A", "n": 2, "val": 203, "drop": ["Super Colon Cleanse 60 CAP", "Blood Cleanse 90 CAP"], "addin": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz"]}, {"il": 10086, "name": "Parkway Natural Foods", "rank": "B", "n": 2, "val": 196, "drop": ["Colon Cleanse, Original 200 CAP", "Colon Cleanse, Original Powder 48oz"], "addin": ["Super Colon Cleanse 240 CAP", "Super Colon Cleanse, Powder 12oz"]}, {"il": 26118, "name": "Healthy Habit", "rank": "B", "n": 2, "val": 195, "drop": ["Kidney Cleanse 60 CAP", "Liver Detox 60 CAP"], "addin": ["Super Colon Cleanse, Powder 12oz", "Super Colon Cleanse 120 CAP"]}], "counts": {"place": 1755, "add": 923, "swap": 408}, "totals": {"place": 311215, "add": 313793, "swap": 40084}, "vpsku": {"A": 90.51999999999998, "B": 55.33125, "C": 47.102000000000004, "D": 52.18}}};
+const C={orange:'#e1822e',indigo:'#e1822e',cyan:'#2e9e5b',amber:'#d99a2e',green:'#2e9e5b',mut:'#77736b',bd:'#e8e3d9',ink:'#20201d',red:'#d9534f',grey:'#e2ddd1'};
+Chart.defaults.color=C.mut;Chart.defaults.borderColor=C.bd;Chart.defaults.font.family='-apple-system,Segoe UI,Roboto,Arial';
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const money=n=>'$'+Math.round(n).toLocaleString();
+
+const BR=DATA.brand;
+document.getElementById('brandPill').textContent=BR.toUpperCase();
+
+/* tabs */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');document.getElementById(t.dataset.v).classList.add('on');
+});
+
+/* ---- COVERAGE ---- */
+const cov=DATA.coverage;
+[['n', (cov.universe).toLocaleString(),'independent doors in the universe'],
+ ['n', (cov.inn).toLocaleString(),'doors you\'re in today'],
+ ['n', cov.pct+'%','overall coverage'],
+ ['n', (cov.toTarget).toLocaleString(),'doors still open to you']
+].forEach((k,i)=>{const d=el('div','kpi');const col=[C.ink,C.green,C.orange,C.amber][i];
+  d.appendChild(el('div','n',k[1]));d.querySelector('.n').style.color=col;d.appendChild(el('div','l',k[2]));$('#covKpis').appendChild(d)});
+
+const SIZE={A:'Largest',B:'Large',C:'Mid',D:'Small'};
+new Chart($('#covChart'),{type:'bar',data:{labels:cov.byRank.map(r=>SIZE[r.rank]+' doors'),
+ datasets:[{label:'In',data:cov.byRank.map(r=>r.inn),backgroundColor:C.cyan,borderRadius:5},
+           {label:'Still open',data:cov.byRank.map(r=>r.total-r.inn),backgroundColor:C.grey,borderRadius:5}]},
+ options:{maintainAspectRatio:false,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:C.bd}}},
+   plugins:{legend:{position:'top'},tooltip:{callbacks:{afterBody:(it)=>{const r=cov.byRank[it[0].dataIndex];return r.pct+'% covered'}}}}}});
+
+$('#covInsight').innerHTML=
+ '<div class="insight">You\'re in <b>'+cov.byRank[0].pct+'% of the largest doors</b> but only <b>'+cov.byRank[3].pct+'% of the smallest</b>. '
+ +'That\'s the classic mature-brand shape: strong where volume is obvious, thin where coverage takes effort.</div>'
+ +'<div class="insight" style="border-left-color:'+C.green+'">The cheapest growth is the <b>'+(cov.byRank[1].total-cov.byRank[1].inn+cov.byRank[2].total-cov.byRank[2].inn).toLocaleString()
+ +' open large and mid-size doors</b> — comparable to stores already reordering you. Breadth before you chase the long tail.</div>';
+
+const stbody=$('#storeTable');
+stbody.innerHTML='<thead><tr><th>Rank</th><th>Store</th><th>Group</th><th class="num">'+BR+' $ \u00b7 Q1 \u201923</th><th class="num">Door $ \u00b7 Q1 \u201923</th><th class="num">Penetration</th></tr></thead>';
+const tb=el('tbody');DATA.topStores.forEach(s=>{const tr=el('tr');
+ const pc=s.pen>=30?C.green:s.pen>=15?C.amber:C.red;
+ tr.innerHTML='<td><span class="tag '+s.rank+'">'+s.rank+'</span></td><td>'+s.name+'</td>'
+ +'<td>'+(s.group?'<span class="tag grp">'+s.group+'</span>':'<span class="muted">\u2014</span>')+'</td>'
+ +'<td class="num">'+money(s.al)+'</td><td class="num muted">'+money(s.doorvol)+'</td>'
+ +'<td class="num" style="color:'+pc+';font-weight:700">'+s.pen+'%</td>';tb.appendChild(tr)});stbody.appendChild(tb);
+const big=DATA.topStores.slice().sort((a,b)=>b.doorvol-a.doorvol)[0];
+$('#penInsight').innerHTML='<b>Your biggest accounts aren\u2019t always your best-penetrated.</b> '+big.name+' is a '+money(big.doorvol)+' door at just <b>'+big.pen+'%</b> '+BR+'. The nearest growth is depth in doors you already own \u2014 not new doors.';
+
+/* ---- LEVERS ---- */
+const LV=DATA.levers, VP=LV.vpsku, mult=Math.max(2,Math.round(VP.A/VP.D));
+const levCfg={
+ place:{intro:'Doors that buy other brands but carry <b>zero '+BR+'</b>. Each row is a new placement, ranked by what it should produce a quarter at a door this size.',
+   valword:'placement value', act:r=>'Place '+r.n+' SKUs', items:r=>r.skus.join(', '), itemHead:'Hero items to place'},
+ add:{intro:'Doors already carrying '+BR+' with room for <b>proven movers they\u2019re missing</b>. Ranked by each door\u2019s own velocity \u2014 deepening a strong door beats chasing a weak one.',
+   valword:'added value', act:r=>'Add '+r.n+' proven', items:r=>r.skus.join(', '), itemHead:'Top missing movers'},
+ swap:{intro:'Doors carrying <b>weak items while missing stronger sellers</b>. Ranked by the value of swapping a slow facing for a proven mover.',
+   valword:'upgrade value', act:r=>'Swap '+r.n, items:r=>r.drop.join(', ')+' &rarr; '+r.addin.join(', '), itemHead:'Drop &rarr; Add in'}
+};
+function renderLever(key){const cfg=levCfg[key], rows=LV[key], max=Math.max.apply(null,rows.map(r=>r.val))||1;
+ $('#'+key+'Intro').innerHTML=cfg.intro;
+ const kp=$('#'+key+'Kpis');
+ [[(LV.counts[key]).toLocaleString(),'doors in this lever',C.ink],
+  [money(LV.totals[key]),'projected '+cfg.valword+' / quarter',C.green],
+  ['~'+mult+'\u00d7','more value per SKU in an A-door than a D-door',C.orange]
+ ].forEach(k=>{const d=el('div','kpi');d.appendChild(el('div','n',k[0]));d.querySelector('.n').style.color=k[2];d.appendChild(el('div','l',k[1]));kp.appendChild(d)});
+ const t=$('#'+key+'Table');
+ t.innerHTML='<thead><tr><th>#</th><th>Rank</th><th>Store</th><th>Action</th><th>'+cfg.itemHead+'</th><th class="num">Proj. value / qtr</th></tr></thead>';
+ const tb=el('tbody');
+ rows.forEach((r,i)=>{const tr=el('tr');
+  tr.innerHTML='<td class="muted">'+(i+1)+'</td>'
+   +'<td><span class="tag '+r.rank+'">'+r.rank+'</span></td>'
+   +'<td>'+r.name+'</td>'
+   +'<td class="muted">'+cfg.act(r)+'</td>'
+   +'<td class="why">'+cfg.items(r)+'</td>'
+   +'<td class="num"><div class="valwrap"><span style="font-weight:700">'+money(r.val)+'</span><div class="valbar"><i style="width:'+Math.round(100*r.val/max)+'%"></i></div></div></td>';
+  tb.appendChild(tr)});
+ t.appendChild(tb);}
+['place','add','swap'].forEach(renderLever);
+</script>
+</body>
+</html>

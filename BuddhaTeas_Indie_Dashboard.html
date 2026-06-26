@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ShelfIQ — Indie Optimization</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f3ef; --card:#ffffff; --card2:#faf8f4; --bd:#e8e3d9; --ink:#20201d; --mut:#77736b;
+  --orange:#e1822e; --orange-deep:#c56c1e; --indigo:#e1822e; --cyan:#2e9e5b; --amber:#d99a2e; --green:#2e9e5b; --red:#d9534f; --grey:#e2ddd1;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)!important;min-height:100%}
+body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 64px;min-height:100vh}
+header.top{background:#ffffff;border-bottom:1px solid var(--bd);
+  margin:0 -20px 0;padding:22px 28px 0}
+.brandrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pill{background:var(--orange);color:#ffffff;font-weight:800;
+  padding:7px 16px;border-radius:30px;font-size:13px;letter-spacing:.5px}
+h1{font-size:20px;font-weight:700;margin:0}
+.sub{color:var(--mut);font-size:12.5px;margin-top:3px}
+.tabs{display:flex;gap:4px;margin-top:18px;flex-wrap:wrap}
+.tab{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--mut);
+  padding:11px 16px;font-size:13.5px;font-weight:600;cursor:pointer}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--ink);border-bottom-color:var(--orange)}
+section.view{display:none;padding-top:24px}
+section.view.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px 18px}
+.kpi .n{font-size:30px;font-weight:800;line-height:1.1}
+.kpi .l{color:var(--mut);font-size:12px;margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px}
+.card h3{margin:0 0 4px;font-size:14px}
+.card .cap{color:var(--mut);font-size:12px;margin:0 0 14px}
+.chartbox{position:relative;height:300px}
+.insight{background:var(--card2);border:1px solid var(--bd);border-left:3px solid var(--orange);
+  border-radius:10px;padding:12px 15px;font-size:13px;color:#3a382f;margin-top:16px}
+.insight b{color:var(--orange-deep)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--bd)}
+th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.tag.A,.tag.Core{background:rgba(225,130,46,.15);color:#b5641a}
+.tag.B,.tag.Differentiator{background:rgba(46,158,91,.15);color:#237344}
+.tag.C{background:rgba(217,154,46,.18);color:#946614}
+.tag.D,.tag.Prune{background:rgba(120,115,107,.15);color:#6b675f}
+.tag.grp{background:rgba(46,158,91,.12);color:#237344}
+select{background:var(--card2);color:var(--ink);border:1px solid var(--bd);border-radius:9px;
+  padding:9px 12px;font-size:13.5px;min-width:300px;max-width:100%}
+.storehead{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 6px}
+.stat{background:var(--card2);border:1px solid var(--bd);border-radius:11px;padding:12px 16px;min-width:120px}
+.stat .n{font-size:22px;font-weight:800}.stat .l{color:var(--mut);font-size:11.5px;margin-top:3px}
+.bar{height:9px;border-radius:6px;background:var(--bd);overflow:hidden;margin-top:8px}
+.bar > i{display:block;height:100%;background:linear-gradient(90deg,#e1822e,#e89b4e)}
+.scroll{max-height:520px;overflow:auto}
+.muted{color:var(--mut)} .why{color:var(--mut);font-size:12px}
+.note{color:var(--mut);font-size:11.5px;margin-left:auto;align-self:center}
+.bandsel{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.bandbtn{background:var(--card2);border:1px solid var(--bd);color:var(--mut);border-radius:9px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.bandbtn:hover{color:var(--ink);border-color:var(--orange)}
+.bandbtn.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.bandbtn .bc{font-size:10.5px;font-weight:700;opacity:.65}
+.flabel{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);font-weight:700;margin-bottom:7px}
+.kpis.k3{grid-template-columns:repeat(3,1fr)}
+.valwrap{display:inline-flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:96px}
+.valbar{width:96px;height:6px;background:var(--bd);border-radius:4px;overflow:hidden}
+.valbar > i{display:block;height:100%;background:linear-gradient(90deg,#e1822e,#e89b4e)}
+.lever-intro{max-width:780px;line-height:1.5}
+@media(max-width:880px){.kpis{grid-template-columns:repeat(2,1fr)}.kpis.k3{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}select{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brandrow">
+    <span class="pill" id="brandPill">BRAND</span>
+    <div><h1>Indie Optimization Dashboard</h1>
+    <div class="sub">Independent natural channel · built from your KeHE + UNFI sell-through</div></div>
+    <span class="note">Template — swap in any brand's coverage &amp; sell-through</span>
+  </div>
+  <div class="tabs">
+    <button class="tab on" data-v="coverage">Where you are</button>
+    <button class="tab" data-v="place">Place</button>
+    <button class="tab" data-v="add">Add</button>
+    <button class="tab" data-v="swap">Swap</button>
+  </div>
+</header>
+
+<!-- COVERAGE -->
+<section class="view on" id="coverage">
+  <div class="kpis" id="covKpis"></div>
+  <div class="grid2">
+    <div class="card"><h3>Coverage by door size</h3>
+      <p class="cap">Where you're in vs. the whitespace still open, by how big the door is</p>
+      <div class="chartbox"><canvas id="covChart"></canvas></div></div>
+    <div class="card"><h3>Reading it</h3><p class="cap">What the pattern says</p>
+      <div id="covInsight"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Your accounts &mdash; dollars vs. penetration</h3>
+    <p class="cap">Ranked A&ndash;D by your dollars in the door (Q1 2023). Penetration = your share of everything that door buys. <span style="color:#d9534f">Red</span> = big door, small share = your nearest growth.</p>
+    <div class="scroll"><table id="storeTable"></table></div>
+    <div class="insight" id="penInsight" style="border-left-color:#d9534f;margin-top:14px"></div></div>
+</section>
+
+<!-- PLACE -->
+<section class="view" id="place">
+  <p class="cap lever-intro" id="placeIntro" style="margin-bottom:14px;font-size:13.5px"></p>
+  <div class="kpis k3" id="placeKpis"></div>
+  <div class="card" style="margin-top:4px"><h3>Do these first &mdash; ranked by projected value</h3>
+    <p class="cap">Highest-value opportunities at the top &mdash; work straight down the list.</p>
+    <div class="scroll"><table id="placeTable"></table></div></div>
+</section>
+
+<!-- ADD -->
+<section class="view" id="add">
+  <p class="cap lever-intro" id="addIntro" style="margin-bottom:14px;font-size:13.5px"></p>
+  <div class="kpis k3" id="addKpis"></div>
+  <div class="card" style="margin-top:4px"><h3>Do these first &mdash; ranked by projected value</h3>
+    <p class="cap">Highest-value opportunities at the top &mdash; work straight down the list.</p>
+    <div class="scroll"><table id="addTable"></table></div></div>
+</section>
+
+<!-- SWAP -->
+<section class="view" id="swap">
+  <p class="cap lever-intro" id="swapIntro" style="margin-bottom:14px;font-size:13.5px"></p>
+  <div class="kpis k3" id="swapKpis"></div>
+  <div class="card" style="margin-top:4px"><h3>Do these first &mdash; ranked by projected value</h3>
+    <p class="cap">Highest-value upgrades at the top &mdash; work straight down the list.</p>
+    <div class="scroll"><table id="swapTable"></table></div></div>
+</section>
+</div>
+
+<script>
+const DATA={"brand": "Buddha Teas", "coverage": {"universe": 3554, "inn": 1365, "pct": 38, "toTarget": 2189, "byRank": [{"rank": "A", "inn": 581, "total": 889, "pct": 65}, {"rank": "B", "inn": 495, "total": 888, "pct": 56}, {"rank": "C", "inn": 218, "total": 889, "pct": 25}, {"rank": "D", "inn": 71, "total": 888, "pct": 8}]}, "topStores": [{"rank": "A", "name": "Healthland", "group": "", "al": 21601, "doorvol": 105654, "pen": 20}, {"rank": "A", "name": "Manna Health Pitkin", "group": "", "al": 9172, "doorvol": 197643, "pen": 5}, {"rank": "A", "name": "Vitamin Plus - Lafayette", "group": "", "al": 8324, "doorvol": 43447, "pen": 19}, {"rank": "A", "name": "NATURAL FRONTIER - Corelyou", "group": "", "al": 8140, "doorvol": 27412, "pen": 30}, {"rank": "A", "name": "PERELANDRA NATURAL FOODS", "group": "", "al": 7692, "doorvol": 21522, "pen": 36}, {"rank": "A", "name": "Brown's Market", "group": "", "al": 7240, "doorvol": 15483, "pen": 47}, {"rank": "A", "name": "MOM's Organic Market - Waldorf", "group": "", "al": 7127, "doorvol": 66903, "pen": 11}, {"rank": "A", "name": "A Matter Of Health - Rockland", "group": "INFRA", "al": 7071, "doorvol": 50256, "pen": 14}, {"rank": "A", "name": "Queens Health Emporium", "group": "", "al": 6723, "doorvol": 17876, "pen": 38}, {"rank": "A", "name": "Roots Market - Olney", "group": "INFRA", "al": 5564, "doorvol": 29362, "pen": 19}, {"rank": "A", "name": "The Health Dude", "group": "", "al": 5464, "doorvol": 35905, "pen": 15}, {"rank": "A", "name": "Roots Market - Clarksville", "group": "INFRA", "al": 5365, "doorvol": 30391, "pen": 18}, {"rank": "A", "name": "Clark's Nutrition - Loma Lind", "group": "", "al": 5069, "doorvol": 88593, "pen": 6}, {"rank": "A", "name": "Health Nuts - 99th St", "group": "", "al": 5041, "doorvol": 20957, "pen": 24}, {"rank": "A", "name": "The Whole Wheatery", "group": "INFRA", "al": 4929, "doorvol": 21372, "pen": 23}, {"rank": "A", "name": "Green Organic Market", "group": "", "al": 4877, "doorvol": 19374, "pen": 25}, {"rank": "A", "name": "Ann's Health Food Center - Zang", "group": "INFRA", "al": 4850, "doorvol": 19458, "pen": 25}, {"rank": "A", "name": "Earthlight Natural Foods", "group": "INFRA", "al": 4837, "doorvol": 14451, "pen": 33}, {"rank": "A", "name": "Health Nuts - 1208 2nd Ave", "group": "", "al": 4782, "doorvol": 21432, "pen": 22}, {"rank": "A", "name": "Food For Health", "group": "", "al": 4763, "doorvol": 14613, "pen": 33}, {"rank": "A", "name": "Sevananda Natural Foods", "group": "NCG", "al": 4586, "doorvol": 27363, "pen": 17}, {"rank": "A", "name": "The Apple Crate - Raeford", "group": "INFRA", "al": 4560, "doorvol": 8393, "pen": 54}, {"rank": "A", "name": "Frazier Farms - Oceanside", "group": "INFRA", "al": 4390, "doorvol": 23832, "pen": 18}, {"rank": "A", "name": "Vitamin Plus - Little Rock", "group": "", "al": 4291, "doorvol": 23383, "pen": 18}, {"rank": "A", "name": "MOM's Organic Market - Bowie", "group": "", "al": 4265, "doorvol": 46236, "pen": 9}, {"rank": "A", "name": "Vitamin Plus - Shreveport", "group": "", "al": 4170, "doorvol": 22398, "pen": 19}, {"rank": "A", "name": "MOM's Organic Market - Jessup", "group": "", "al": 3970, "doorvol": 57076, "pen": 7}, {"rank": "A", "name": "The Food Mill/Groc-Thur Kd", "group": "", "al": 3911, "doorvol": 10225, "pen": 38}, {"rank": "A", "name": "Green Acres Health Food", "group": "INFRA", "al": 3871, "doorvol": 8535, "pen": 45}, {"rank": "A", "name": "Organic Basic Food", "group": "", "al": 3721, "doorvol": 25035, "pen": 15}, {"rank": "A", "name": "MOM's Organic Market - Woodbridge", "group": "", "al": 3617, "doorvol": 43866, "pen": 8}, {"rank": "A", "name": "MOM's Organic Market - Hampden", "group": "", "al": 3587, "doorvol": 69504, "pen": 5}, {"rank": "A", "name": "MOM's Organic Market - College Park", "group": "", "al": 3554, "doorvol": 49432, "pen": 7}, {"rank": "A", "name": "Black Forest Acres", "group": "", "al": 3549, "doorvol": 9345, "pen": 38}, {"rank": "A", "name": "African Naturals", "group": "", "al": 3363, "doorvol": 18633, "pen": 18}, {"rank": "A", "name": "Everman Natural Foods - Pensacola", "group": "NCG", "al": 3356, "doorvol": 28454, "pen": 12}, {"rank": "A", "name": "Bonterra Market", "group": "", "al": 3328, "doorvol": 9679, "pen": 34}, {"rank": "A", "name": "Westside Market - 2840 Broadway", "group": "", "al": 3219, "doorvol": 3785, "pen": 85}, {"rank": "A", "name": "MOM's Organic Market - White Marsh", "group": "", "al": 3194, "doorvol": 38919, "pen": 8}, {"rank": "A", "name": "Down To Earth - Pearlridge", "group": "", "al": 3121, "doorvol": 33969, "pen": 9}], "levers": {"place": [{"il": 46, "name": "Co-Op Market Grocery & Deli", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 8243, "name": "La Montanita Co-Op (Valley)", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 8248, "name": "La Montanita Co-Op (Nob Hill)", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 32837, "name": "Lexington Coop -Buffalo", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 57415, "name": "Mother's Market - Hollywood", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 57445, "name": "DOM'S KITCHEN AND MARKET - Wells", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 8306, "name": "La Montanita Co-Op (Santa Fe)", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 8311, "name": "Cids Food Market", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 41118, "name": "DETWILER's Farm Market- PALMETTO", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 49694, "name": "Staff of Life - Watsonville", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 49701, "name": "Zerbo's - Commerce Township", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 562, "name": "Food Conspiracy", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 586, "name": "Barons Market Alpine", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 602, "name": "Wildberries Marketplace", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 603, "name": "North Coast Co-Op -Arcata", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 623, "name": "Berkeley Bowl", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 626, "name": "Berkeley Bowl West", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 634, "name": "Mother's Market - Brea", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 8860, "name": "Hawthorne Valley Farm Store", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 703, "name": "Mother's Market - Costa Mesa", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 721, "name": "Davis Food Co-Op", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 805, "name": "Briarpatch Community Market", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 33587, "name": "Co-Opportunity Market - Culver City", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 842, "name": "Woodlands Market", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 894, "name": "Vicente Foods", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1010, "name": "Jensens Finest Foods - Palm Desert", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 17421, "name": "Isla Vista Food Co-Op", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 9271, "name": "Health & Harmony", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 17478, "name": "Bianchini's\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a0 Market - San Carlos", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 25707, "name": "Good Earth Natural Foods - Mill Valley", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 9326, "name": "WESTSIDE MARKET- 3RD AVE", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1164, "name": "Ocean Beach People's Organic Food Market", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1166, "name": "Barons Market-Hancock", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1203, "name": "Other Avenues Market", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1215, "name": "Canyon Market", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 9408, "name": "Potsdam Coop", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1240, "name": "Slo Food Co-Op", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1257, "name": "Mother's Market - Santa Ana", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 9452, "name": "Abundance Coop", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 1280, "name": "Co-Opportunity Market - Santa Monica", "rank": "A", "n": 3, "val": 195, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}], "add": [{"il": 52423, "name": "Manna Health Pitkin", "rank": "A", "n": 3, "val": 6879, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Hibiscus Tea Bags, Organic"]}, {"il": 2466, "name": "Healthland", "rank": "A", "n": 3, "val": 3600, "skus": ["Elderberry Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic", "Dandelion Root Tea Bags, Organic"]}, {"il": 48735, "name": "SHOFI ENTERPRISE LLC", "rank": "A", "n": 3, "val": 1885, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 6090, "name": "Marquette Food Co-Op", "rank": "A", "n": 3, "val": 1354, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Elderberry Tea Bags, Organic"]}, {"il": 9223, "name": "Westside Market - 2840 Broadway", "rank": "B", "n": 3, "val": 1207, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 30968, "name": "Earth Wise Vitamins", "rank": "B", "n": 3, "val": 1098, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 10491, "name": "East End Food Coop", "rank": "A", "n": 3, "val": 1035, "skus": ["Chaga Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Turmeric Ginger Tea Bags, Organic"]}, {"il": 9990, "name": "Ashland Food Cooperative", "rank": "A", "n": 3, "val": 1025, "skus": ["Milk Thistle Tea Bags, Organic", "Elderberry Tea Bags, Organic", "Turmeric Ginger Tea Bags, Organic"]}, {"il": 5374, "name": "River Valley Market", "rank": "A", "n": 3, "val": 984, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Elderberry Tea Bags, Organic"]}, {"il": 883, "name": "Clark's Nutrition - Loma Lind", "rank": "A", "n": 3, "val": 845, "skus": ["Matcha Green Tea Bags, Organic", "Burdock Root Tea Bags, Organic", "Lavender Tea Bags, Organic"]}, {"il": 28209, "name": "Sacramento Natural Foods Co-Op", "rank": "A", "n": 3, "val": 810, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Hibiscus Tea Bags, Organic"]}, {"il": 56582, "name": "Erewhon - Beverly Hills", "rank": "A", "n": 3, "val": 777, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 3191, "name": "Sevananda Natural Foods", "rank": "A", "n": 3, "val": 764, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 16000, "name": "Organic Roots - Temecula", "rank": "A", "n": 3, "val": 740, "skus": ["Ashwagandha Tea Bags, Organic", "Hibiscus Tea Bags, Organic", "Burdock Root Tea Bags, Organic"]}, {"il": 7758, "name": "Monadnock Food Co-Op", "rank": "A", "n": 3, "val": 732, "skus": ["Ashwagandha Tea Bags, Organic", "Elderberry Tea Bags, Organic", "Hibiscus Tea Bags, Organic"]}, {"il": 5691, "name": "MOM's Organic Market - Waldorf", "rank": "A", "n": 3, "val": 713, "skus": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic", "CBD Chamomile Blend Tea Bags, Organic"]}, {"il": 7242, "name": "Good Food Store", "rank": "A", "n": 3, "val": 686, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 8589, "name": "PERELANDRA NATURAL FOODS", "rank": "A", "n": 3, "val": 679, "skus": ["Calm Buddha Blend Tea Bags, Organic", "CBD Chamomile Blend Tea Bags, Organic", "Sleepy Temple Blend Tea Bags, Organic"]}, {"il": 26333, "name": "Sage Health Food Market", "rank": "B", "n": 3, "val": 655, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 41262, "name": "Erewhon Market - Santa Monica", "rank": "A", "n": 3, "val": 633, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 12822, "name": "Sunny Farms", "rank": "A", "n": 3, "val": 626, "skus": ["Ashwagandha Tea Bags, Organic", "Turmeric Ginger Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 12620, "name": "Hanover Co-Op Food Store (White River Junction)", "rank": "A", "n": 3, "val": 615, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Elderberry Tea Bags, Organic"]}, {"il": 12584, "name": "Healthy Living - South Burlington", "rank": "A", "n": 3, "val": 609, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 722, "name": "Jimbo's - Carmel Valley", "rank": "A", "n": 3, "val": 607, "skus": ["Ashwagandha Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic", "Burdock Root Tea Bags, Organic"]}, {"il": 7764, "name": "Hanover Co-Op Food Store -Lebanon", "rank": "A", "n": 3, "val": 603, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Elderberry Tea Bags, Organic"]}, {"il": 19694, "name": "Goose Community Grocer", "rank": "A", "n": 3, "val": 591, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 7235, "name": "TOWN & COUNTRY FOODS - LIVINGSTON", "rank": "A", "n": 3, "val": 591, "skus": ["Chaga Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Turmeric Ginger Tea Bags, Organic"]}, {"il": 4905, "name": "Gene's Health Foods & Supply", "rank": "B", "n": 3, "val": 582, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Turmeric Ginger Tea Bags, Organic"]}, {"il": 5044, "name": "Vitamin Plus - Lafayette", "rank": "A", "n": 3, "val": 581, "skus": ["Mushroom Wellness Blend Tea Bags, Organic", "CBD Chamomile Blend Tea Bags, Organic", "CBD Turmeric and Ginger Tea Bags, Organic"]}, {"il": 46724, "name": "EVERMAN Natural Foods- NINE MILE", "rank": "A", "n": 3, "val": 560, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Hibiscus Tea Bags, Organic"]}, {"il": 11991, "name": "Granary St #6 - New Boston Rd", "rank": "A", "n": 3, "val": 549, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Elderberry Tea Bags, Organic"]}, {"il": 23349, "name": "The Health Dude", "rank": "A", "n": 3, "val": 546, "skus": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 2940, "name": "Earth Origins Mkt #09", "rank": "A", "n": 3, "val": 539, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 12825, "name": "TOWN AND COUNTRY - CENTRAL MARKET SHORELINE", "rank": "A", "n": 3, "val": 533, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 993, "name": "Frazier Farms - Oceanside", "rank": "A", "n": 3, "val": 527, "skus": ["Mullein Leaf Tea Bags, Organic", "Nettle Leaf Tea Bags, Organic", "Mushroom Wellness Blend Tea Bags, Organic"]}, {"il": 15629, "name": "Down To Earth - Kapolei", "rank": "A", "n": 3, "val": 526, "skus": ["Hibiscus Tea Bags, Organic", "Matcha Green Tea Bags, Organic", "Burdock Root Tea Bags, Organic"]}, {"il": 4884, "name": "Good Foods Coop", "rank": "A", "n": 3, "val": 518, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Turmeric Ginger Tea Bags, Organic"]}, {"il": 12773, "name": "The Food Co-Op - Port Townsend", "rank": "A", "n": 3, "val": 506, "skus": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 13226, "name": "Golden Harvest", "rank": "A", "n": 3, "val": 503, "skus": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic", "Hibiscus Tea Bags, Organic"]}, {"il": 1191, "name": "Rainbow Grocery -San Francisco", "rank": "A", "n": 3, "val": 501, "skus": ["Hibiscus Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic", "Dandelion Root Tea Bags, Organic"]}], "swap": [{"il": 2466, "name": "Healthland", "rank": "A", "n": 2, "val": 1200, "drop": ["Gingko Biloba Tea Bags, Organic", "Passion Flower Tea Bags, Organic"], "addin": ["Elderberry Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 9223, "name": "Westside Market - 2840 Broadway", "rank": "B", "n": 2, "val": 402, "drop": ["CBD Cacao Fusion Tea Bags, Organic", "CBD Mushroom Defense Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 883, "name": "Clark's Nutrition - Loma Lind", "rank": "A", "n": 2, "val": 282, "drop": ["Pau d'Arco Tea Bags, Organic", "Throat Bliss Blend Tea Bags, Organic"], "addin": ["Matcha Green Tea Bags, Organic", "Burdock Root Tea Bags, Organic"]}, {"il": 56582, "name": "Erewhon - Beverly Hills", "rank": "A", "n": 2, "val": 259, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Sleepy Buddha Blend Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 3191, "name": "Sevananda Natural Foods", "rank": "A", "n": 2, "val": 255, "drop": ["Root Chakra Tea Bags, Organic", "Crown Chakra Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 5691, "name": "MOM's Organic Market - Waldorf", "rank": "A", "n": 2, "val": 238, "drop": ["Rose Hips Tea Bags, Organic", "Zenergy Blend Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 8589, "name": "PERELANDRA NATURAL FOODS", "rank": "A", "n": 2, "val": 226, "drop": ["Horsetail Tea Bags, Organic", "Marshmallow Leaf Tea Bags, Organic"], "addin": ["Calm Buddha Blend Tea Bags, Organic", "CBD Chamomile Blend Tea Bags, Organic"]}, {"il": 41262, "name": "Erewhon Market - Santa Monica", "rank": "A", "n": 2, "val": 211, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Sleepy Buddha Blend Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 12584, "name": "Healthy Living - South Burlington", "rank": "A", "n": 2, "val": 203, "drop": ["Zenergy Blend Tea Bags, Organic", "Holy Basil (Tulsi) Tea Bags, Organic"], "addin": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 5044, "name": "Vitamin Plus - Lafayette", "rank": "A", "n": 2, "val": 194, "drop": ["4th Chakra Tea Bags, Organic", "Marshmallow Leaf Tea Bags, Organic"], "addin": ["Mushroom Wellness Blend Tea Bags, Organic", "CBD Chamomile Blend Tea Bags, Organic"]}, {"il": 46724, "name": "EVERMAN Natural Foods- NINE MILE", "rank": "A", "n": 2, "val": 187, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Mushroom Defense Tea Bags, Organic"], "addin": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 11991, "name": "Granary St #6 - New Boston Rd", "rank": "A", "n": 2, "val": 183, "drop": ["Eyebright Herb Tea Bags, Organic", "Sage Leaf Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 23349, "name": "The Health Dude", "rank": "A", "n": 2, "val": 182, "drop": ["Assam Tea Bags, Organic", "Skinny Buddha Blend Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 993, "name": "Frazier Farms - Oceanside", "rank": "A", "n": 2, "val": 176, "drop": ["Holy Basil (Tulsi) Tea Bags, Organic", "Sage Leaf Tea Bags, Organic"], "addin": ["Mullein Leaf Tea Bags, Organic", "Nettle Leaf Tea Bags, Organic"]}, {"il": 15629, "name": "Down To Earth - Kapolei", "rank": "A", "n": 2, "val": 175, "drop": ["Throat Bliss Blend Tea Bags, Organic", "Sage Leaf Tea Bags, Organic"], "addin": ["Hibiscus Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 10491, "name": "East End Food Coop", "rank": "A", "n": 1, "val": 173, "drop": ["Hawthorn Berry Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic"]}, {"il": 1191, "name": "Rainbow Grocery -San Francisco", "rank": "A", "n": 2, "val": 167, "drop": ["Parsley Leaf Tea Bags, Organic", "Papaya Leaf Tea Bags, Organic"], "addin": ["Hibiscus Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 27198, "name": "Erewhon Market - Venice", "rank": "A", "n": 2, "val": 164, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Sleepy Buddha Blend Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 15630, "name": "Down To Earth - Pearlridge", "rank": "A", "n": 2, "val": 164, "drop": ["Sage Leaf Tea Bags, Organic", "Fenugreek Seed Tea Bags, Organic"], "addin": ["Burdock Root Tea Bags, Organic", "Lavender Tea Bags, Organic"]}, {"il": 1742, "name": "Yes!  Organic Market #4 - Brookland", "rank": "A", "n": 2, "val": 156, "drop": ["Marshmallow Leaf Tea Bags, Organic", "Ginger Root Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Mushroom Wellness Blend Tea Bags, Organic"]}, {"il": 3591, "name": "Down To Earth Kailua", "rank": "A", "n": 2, "val": 151, "drop": ["Fenugreek Seed Tea Bags, Organic", "Golden Milk"], "addin": ["Burdock Root Tea Bags, Organic", "Dandelion Root Tea Bags, Organic"]}, {"il": 9093, "name": "New Paltz Health & Nutrition Center", "rank": "A", "n": 2, "val": 148, "drop": ["Zen Cleanse Blend Tea Bags, Organic", "Holy Basil (Tulsi) Tea Bags, Organic"], "addin": ["Hibiscus Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 2742, "name": "Everman Natural Foods - Pensacola", "rank": "A", "n": 2, "val": 146, "drop": ["Cat's Claw Tea Bags, Organic", "Chickweed Tea Bags, Organic"], "addin": ["Hibiscus Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 15695, "name": "Erewhon Market - Calabasas", "rank": "B", "n": 2, "val": 145, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Sleepy Buddha Blend Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 909, "name": "Erewhon Market - Los Angles", "rank": "A", "n": 2, "val": 142, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Sleepy Buddha Blend Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 5541, "name": "MOM's Organic Market - Bowie", "rank": "A", "n": 2, "val": 142, "drop": ["Passion Flower Tea Bags, Organic", "Horsetail Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 12425, "name": "Ellwood Thompson's", "rank": "A", "n": 2, "val": 141, "drop": ["Sacral Chakra Tea Bags, Organic", "Throat Bliss Blend Tea Bags, Organic"], "addin": ["Mullein Leaf Tea Bags, Organic", "Dandelion Root Tea Bags, Organic"]}, {"il": 3588, "name": "Down To Earth Kahului", "rank": "A", "n": 2, "val": 140, "drop": ["Fenugreek Seed Tea Bags, Organic", "Golden Milk"], "addin": ["Burdock Root Tea Bags, Organic", "Dandelion Root Tea Bags, Organic"]}, {"il": 49104, "name": "Erewhon Market - Silver Lake", "rank": "A", "n": 2, "val": 139, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Sleepy Buddha Blend Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 44362, "name": "Erewhon Market - Pacific Palisades", "rank": "A", "n": 2, "val": 138, "drop": ["CBD Matcha Green Tea Bags, Organic", "CBD Sleepy Buddha Blend Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Ashwagandha Tea Bags, Organic"]}, {"il": 57855, "name": "PLUM MARKET -AVENTURE", "rank": "A", "n": 2, "val": 137, "drop": ["Dark Roast Yerba Mate Bags", "Fenugreek Seed Tea Bags, Organic"], "addin": ["Mullein Leaf Tea Bags, Organic", "Calm Buddha Blend Tea Bags, Organic"]}, {"il": 15779, "name": "Rainbow Acres Natural Foods", "rank": "A", "n": 2, "val": 137, "drop": ["Corn Silk Tea Bags, Organic", "Passion Flower Tea Bags, Organic"], "addin": ["Chaga Tea Bags, Organic", "Elderberry Tea Bags, Organic"]}, {"il": 49, "name": "Save U More #4 Homer", "rank": "B", "n": 2, "val": 136, "drop": ["Divine Immunity Blend Tea Bags, Organic", "Throat Bliss Blend Tea Bags, Organic"], "addin": ["Elderberry Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 12329, "name": "Friendly City Food Coop", "rank": "A", "n": 2, "val": 134, "drop": ["Divine Immunity Blend Tea Bags, Organic", "Licorice Root Tea Bags, Organic"], "addin": ["Milk Thistle Tea Bags, Organic", "Mullein Leaf Tea Bags, Organic"]}, {"il": 9478, "name": "Healthy Living - Saratoga", "rank": "A", "n": 2, "val": 132, "drop": ["Zenergy Blend Tea Bags, Organic", "Holy Basil (Tulsi) Tea Bags, Organic"], "addin": ["Ashwagandha Tea Bags, Organic", "Milk Thistle Tea Bags, Organic"]}, {"il": 5617, "name": "MOM's Organic Market - Jessup", "rank": "A", "n": 2, "val": 132, "drop": ["Digestive Nirvana Blend Tea Bags, Organic", "Parsley Leaf Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 10530, "name": "Martindales Natural Fd *Infra*", "rank": "A", "n": 2, "val": 130, "drop": ["Sage Leaf Tea Bags, Organic", "Horsetail Tea Bags, Organic"], "addin": ["Hibiscus Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 4406, "name": "Food Fantasies Naturally", "rank": "A", "n": 2, "val": 129, "drop": ["Sage Leaf Tea Bags, Organic", "CBD Matcha Green Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 25093, "name": "MOM's Organic Market - Hampden", "rank": "A", "n": 2, "val": 124, "drop": ["Parsley Leaf Tea Bags, Organic", "Sage Leaf Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}, {"il": 5559, "name": "MOM's Organic Market - College Park", "rank": "A", "n": 2, "val": 123, "drop": ["Parsley Leaf Tea Bags, Organic", "Zenergy Blend Tea Bags, Organic"], "addin": ["Turmeric Ginger Tea Bags, Organic", "Matcha Green Tea Bags, Organic"]}], "counts": {"place": 1274, "add": 1401, "swap": 806}, "totals": {"place": 133122, "add": 236148, "swap": 36275}, "vpsku": {"A": 65.09222222222222, "B": 40.20285714285714, "C": 28.76, "D": 24.725714285714286}}};
+const C={orange:'#e1822e',indigo:'#e1822e',cyan:'#2e9e5b',amber:'#d99a2e',green:'#2e9e5b',mut:'#77736b',bd:'#e8e3d9',ink:'#20201d',red:'#d9534f',grey:'#e2ddd1'};
+Chart.defaults.color=C.mut;Chart.defaults.borderColor=C.bd;Chart.defaults.font.family='-apple-system,Segoe UI,Roboto,Arial';
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const money=n=>'$'+Math.round(n).toLocaleString();
+
+const BR=DATA.brand;
+document.getElementById('brandPill').textContent=BR.toUpperCase();
+
+/* tabs */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');document.getElementById(t.dataset.v).classList.add('on');
+});
+
+/* ---- COVERAGE ---- */
+const cov=DATA.coverage;
+[['n', (cov.universe).toLocaleString(),'independent doors in the universe'],
+ ['n', (cov.inn).toLocaleString(),'doors you\'re in today'],
+ ['n', cov.pct+'%','overall coverage'],
+ ['n', (cov.toTarget).toLocaleString(),'doors still open to you']
+].forEach((k,i)=>{const d=el('div','kpi');const col=[C.ink,C.green,C.orange,C.amber][i];
+  d.appendChild(el('div','n',k[1]));d.querySelector('.n').style.color=col;d.appendChild(el('div','l',k[2]));$('#covKpis').appendChild(d)});
+
+const SIZE={A:'Largest',B:'Large',C:'Mid',D:'Small'};
+new Chart($('#covChart'),{type:'bar',data:{labels:cov.byRank.map(r=>SIZE[r.rank]+' doors'),
+ datasets:[{label:'In',data:cov.byRank.map(r=>r.inn),backgroundColor:C.cyan,borderRadius:5},
+           {label:'Still open',data:cov.byRank.map(r=>r.total-r.inn),backgroundColor:C.grey,borderRadius:5}]},
+ options:{maintainAspectRatio:false,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:C.bd}}},
+   plugins:{legend:{position:'top'},tooltip:{callbacks:{afterBody:(it)=>{const r=cov.byRank[it[0].dataIndex];return r.pct+'% covered'}}}}}});
+
+$('#covInsight').innerHTML=
+ '<div class="insight">You\'re in <b>'+cov.byRank[0].pct+'% of the largest doors</b> but only <b>'+cov.byRank[3].pct+'% of the smallest</b>. '
+ +'That\'s the classic mature-brand shape: strong where volume is obvious, thin where coverage takes effort.</div>'
+ +'<div class="insight" style="border-left-color:'+C.green+'">The cheapest growth is the <b>'+(cov.byRank[1].total-cov.byRank[1].inn+cov.byRank[2].total-cov.byRank[2].inn).toLocaleString()
+ +' open large and mid-size doors</b> — comparable to stores already reordering you. Breadth before you chase the long tail.</div>';
+
+const stbody=$('#storeTable');
+stbody.innerHTML='<thead><tr><th>Rank</th><th>Store</th><th>Group</th><th class="num">'+BR+' $ \u00b7 Q1 \u201923</th><th class="num">Door $ \u00b7 Q1 \u201923</th><th class="num">Penetration</th></tr></thead>';
+const tb=el('tbody');DATA.topStores.forEach(s=>{const tr=el('tr');
+ const pc=s.pen>=30?C.green:s.pen>=15?C.amber:C.red;
+ tr.innerHTML='<td><span class="tag '+s.rank+'">'+s.rank+'</span></td><td>'+s.name+'</td>'
+ +'<td>'+(s.group?'<span class="tag grp">'+s.group+'</span>':'<span class="muted">\u2014</span>')+'</td>'
+ +'<td class="num">'+money(s.al)+'</td><td class="num muted">'+money(s.doorvol)+'</td>'
+ +'<td class="num" style="color:'+pc+';font-weight:700">'+s.pen+'%</td>';tb.appendChild(tr)});stbody.appendChild(tb);
+const big=DATA.topStores.slice().sort((a,b)=>b.doorvol-a.doorvol)[0];
+$('#penInsight').innerHTML='<b>Your biggest accounts aren\u2019t always your best-penetrated.</b> '+big.name+' is a '+money(big.doorvol)+' door at just <b>'+big.pen+'%</b> '+BR+'. The nearest growth is depth in doors you already own \u2014 not new doors.';
+
+/* ---- LEVERS ---- */
+const LV=DATA.levers, VP=LV.vpsku, mult=Math.max(2,Math.round(VP.A/VP.D));
+const levCfg={
+ place:{intro:'Doors that buy other brands but carry <b>zero '+BR+'</b>. Each row is a new placement, ranked by what it should produce a quarter at a door this size.',
+   valword:'placement value', act:r=>'Place '+r.n+' SKUs', items:r=>r.skus.join(', '), itemHead:'Hero items to place'},
+ add:{intro:'Doors already carrying '+BR+' with room for <b>proven movers they\u2019re missing</b>. Ranked by each door\u2019s own velocity \u2014 deepening a strong door beats chasing a weak one.',
+   valword:'added value', act:r=>'Add '+r.n+' proven', items:r=>r.skus.join(', '), itemHead:'Top missing movers'},
+ swap:{intro:'Doors carrying <b>weak items while missing stronger sellers</b>. Ranked by the value of swapping a slow facing for a proven mover.',
+   valword:'upgrade value', act:r=>'Swap '+r.n, items:r=>r.drop.join(', ')+' &rarr; '+r.addin.join(', '), itemHead:'Drop &rarr; Add in'}
+};
+function renderLever(key){const cfg=levCfg[key], rows=LV[key], max=Math.max.apply(null,rows.map(r=>r.val))||1;
+ $('#'+key+'Intro').innerHTML=cfg.intro;
+ const kp=$('#'+key+'Kpis');
+ [[(LV.counts[key]).toLocaleString(),'doors in this lever',C.ink],
+  [money(LV.totals[key]),'projected '+cfg.valword+' / quarter',C.green],
+  ['~'+mult+'\u00d7','more value per SKU in an A-door than a D-door',C.orange]
+ ].forEach(k=>{const d=el('div','kpi');d.appendChild(el('div','n',k[0]));d.querySelector('.n').style.color=k[2];d.appendChild(el('div','l',k[1]));kp.appendChild(d)});
+ const t=$('#'+key+'Table');
+ t.innerHTML='<thead><tr><th>#</th><th>Rank</th><th>Store</th><th>Action</th><th>'+cfg.itemHead+'</th><th class="num">Proj. value / qtr</th></tr></thead>';
+ const tb=el('tbody');
+ rows.forEach((r,i)=>{const tr=el('tr');
+  tr.innerHTML='<td class="muted">'+(i+1)+'</td>'
+   +'<td><span class="tag '+r.rank+'">'+r.rank+'</span></td>'
+   +'<td>'+r.name+'</td>'
+   +'<td class="muted">'+cfg.act(r)+'</td>'
+   +'<td class="why">'+cfg.items(r)+'</td>'
+   +'<td class="num"><div class="valwrap"><span style="font-weight:700">'+money(r.val)+'</span><div class="valbar"><i style="width:'+Math.round(100*r.val/max)+'%"></i></div></div></td>';
+  tb.appendChild(tr)});
+ t.appendChild(tb);}
+['place','add','swap'].forEach(renderLever);
+</script>
+</body>
+</html>
