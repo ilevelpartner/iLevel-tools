@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Turnpike — Buyer Experience Build Spec</title>
+<style>
+:root{
+  --o:#e8611a; --amber:#dda032; --ink:#23252b; --muted:#6c7079; --line:#e3e5ea;
+  --soft:#fff4ed; --soft-line:#f6c9ac; --on:#3fa34d; --grey-line:#d7dae0;
+  --field:#f2f3f6; --violet:#5b3fa8; --violet-bg:#f3f0fb; --violet-line:#e2dbf3;
+  --err:#c0392b; --err-bg:#fdf2f0; --err-line:#f2cdc6;
+  --ok-bg:#eef8f0; --ok-line:#c9e6cf; --ok-ink:#2f7d3f;
+  --nav-w:250px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#f1f2f5;color:var(--ink);
+     font:15px/1.6 "Segoe UI",Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* ---------- shell ---------- */
+.shell{display:flex;align-items:flex-start;max-width:1500px;margin:0 auto}
+.side{width:var(--nav-w);flex:0 0 var(--nav-w);position:sticky;top:0;height:100vh;overflow-y:auto;
+      background:#1a1a2e;padding:24px 0 40px}
+.side .brand{padding:0 22px 18px;border-bottom:1px solid #2c2c48;margin-bottom:14px}
+.side .brand b{display:block;color:#fff;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.side .brand span{display:block;color:#8f92ad;font-size:11.5px;margin-top:3px}
+.side a{display:block;padding:7px 22px;color:#b9bcd0;text-decoration:none;font-size:13.5px;border-left:3px solid transparent}
+.side a:hover{color:#fff;background:#23233c}
+.side a.grp{color:#6e7192;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+            padding:16px 22px 5px;pointer-events:none}
+.side a.hot{color:#ffb37a}
+.main{flex:1;min-width:0;padding:0 0 90px}
+
+/* ---------- typography ---------- */
+.top{background:#fff;padding:34px 40px 28px;border-bottom:1px solid var(--line)}
+.top h1{margin:0 0 6px;font-size:29px;letter-spacing:-.02em}
+.top .lede{color:var(--muted);font-size:15px;max-width:820px;margin:0 0 18px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.meta span{font-size:11.5px;background:#f4f5f8;border:1px solid var(--line);border-radius:6px;padding:4px 10px;color:#4d525b}
+.meta span b{color:var(--ink)}
+
+section{padding:34px 40px 10px;scroll-margin-top:0}
+section+section{border-top:1px solid #e5e7eb}
+h2{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+h2 .num{color:#b9bec7;font-weight:600;margin-right:9px}
+.slede{color:var(--muted);font-size:14px;max-width:860px;margin:0 0 20px}
+h3{font-size:15.5px;margin:24px 0 9px}
+h4{font-size:12.5px;margin:20px 0 8px;text-transform:uppercase;letter-spacing:.07em;color:#6b7079}
+p{margin:0 0 12px;max-width:860px}
+code{font:13px/1.5 Consolas,"SF Mono",monospace;background:#f1f2f5;border-radius:4px;padding:1px 5px}
+pre{font:13px/1.6 Consolas,"SF Mono",monospace;background:#1e1e30;color:#dfe3f0;padding:13px 16px;
+    border-radius:8px;overflow-x:auto;margin:0 0 14px;max-width:860px}
+pre .c{color:#7e83a8}
+pre .k{color:#ffb37a}
+ul{margin:0 0 14px;padding-left:20px;max-width:860px}
+li{margin-bottom:6px}
+
+/* ---------- callouts ---------- */
+.box{border-radius:9px;padding:13px 16px;margin:0 0 16px;max-width:860px;font-size:14px}
+.box b.t{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:5px}
+.box.stop{background:var(--err-bg);border:1px solid var(--err-line)}
+.box.stop b.t{color:var(--err)}
+.box.why{background:#f5f6fa;border:1px solid #dfe2ea}
+.box.why b.t{color:#5a6070}
+.box.ok{background:var(--ok-bg);border:1px solid var(--ok-line)}
+.box.ok b.t{color:var(--ok-ink)}
+
+/* ---------- tables ---------- */
+table{border-collapse:collapse;width:100%;max-width:940px;margin:0 0 16px;font-size:13.5px}
+th{background:#1a1a2e;color:#fff;text-align:left;padding:8px 11px;font-size:11.5px;font-weight:600;
+   letter-spacing:.03em}
+td{padding:8px 11px;border-bottom:1px solid #ebedf1;vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) td{background:#fafbfc}
+td code{font-size:12px}
+
+/* ---------- accept list ---------- */
+.acc{background:#fff;border:1px solid var(--line);border-radius:9px;padding:14px 18px;max-width:860px;margin:0 0 8px}
+.acc h4{margin:0 0 10px}
+.acc ul{list-style:none;padding:0;margin:0}
+.acc li{padding-left:26px;position:relative;font-size:13.5px}
+.acc li::before{content:"";position:absolute;left:0;top:4px;width:14px;height:14px;
+                border:1.5px solid #c3c7cf;border-radius:3px}
+
+/* ---------- mockup frame ---------- */
+.mock{background:#e9ebef;border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 18px;overflow-x:auto}
+.mock .cap{font-size:11.5px;color:#767b85;margin-bottom:10px}
+.mock .cap b{color:var(--ink)}
+.vp{background:#fff;border-radius:7px;overflow:hidden;box-shadow:0 1px 3px rgba(20,20,40,.09);min-width:940px}
+
+/* ---------- app chrome (shared by mockups) ---------- */
+.hdr{border-bottom:3px solid #f0a33c}
+.b1{display:flex;align-items:center;gap:17px;padding:0 20px;height:56px}
+.lg{flex:0 0 148px;font-size:24px;font-weight:800;letter-spacing:-.02em;
+    background:linear-gradient(92deg,#f5a020,#e8551f);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nv{display:flex;align-items:center;gap:18px;font-size:13.5px}
+.nv a{text-decoration:none;color:var(--ink);white-space:nowrap}
+.nv a.hot{color:var(--o);font-weight:600}
+.nv a.cur{background:#fdf3e9;color:var(--o);padding:5px 11px;border-radius:6px}
+.ac{margin-left:auto;display:flex;align-items:center;gap:9px}
+.ic{width:31px;height:31px;border-radius:50%;border:1px solid var(--line);display:flex;
+    align-items:center;justify-content:center;font-size:12px;color:#575c65}
+.cb2{border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:12.5px}
+.cb2.on{border-color:var(--o);color:var(--o);font-weight:700}
+.av{width:32px;height:32px;border-radius:50%;background:var(--o);color:#fff;display:flex;
+    align-items:center;justify-content:center;font-size:11.5px;font-weight:700}
+.b2{display:flex;align-items:center;gap:8px;padding:8px 20px 9px;border-top:1px solid var(--line);flex-wrap:wrap}
+.pl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:7px;height:29px;padding:0 12px;border-radius:999px;
+      font-size:12.5px;border:1px solid var(--soft-line);background:var(--soft);white-space:nowrap}
+.dt{width:8px;height:8px;border-radius:50%;background:var(--on)}
+.hl{width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #b3b8c0}
+.ds{font-weight:700;color:var(--o)}
+.dc{color:var(--muted)}
+.pill.off{background:#f4f5f7;border-color:var(--grey-line);opacity:.75}
+.pill.off .dt{background:transparent;box-shadow:inset 0 0 0 1.5px #b3b8c0}
+.pill.off .ds{color:var(--muted)}
+.pill.fm{background:var(--violet-bg);border-color:var(--violet-line)}
+.pill.fm .dt{background:#6b4fbb}
+.pill.fm .ds{color:var(--violet)}
+.pill.act{background:transparent;border:1px dashed var(--grey-line);color:var(--muted)}
+.pill.add{background:transparent;border:1px dashed var(--grey-line);color:var(--muted);font-weight:600}
+
+/* cards */
+.body2{padding:15px 20px 20px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.cd{border:1px solid var(--line);border-radius:9px;padding:11px;position:relative}
+.th{height:92px;border-radius:6px;background:#f5f6f8;display:flex;align-items:center;justify-content:center;
+    color:#c7cad0;font-size:10.5px;margin-bottom:9px}
+.bm{position:absolute;top:8px;right:8px;width:21px;height:21px;border-radius:50%;border:1px solid var(--soft-line);
+    color:var(--o);font-size:10px;display:flex;align-items:center;justify-content:center;background:#fff}
+.br{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pn{font-size:12.5px;font-weight:600;color:var(--o);line-height:1.3;margin:2px 0 6px}
+.pr{font-size:12.5px;margin-bottom:7px}
+.pr s{color:#b6b9c0;margin-right:4px}
+.pr b{font-size:16px;color:var(--o)}
+.pr em{font-style:normal;color:var(--muted);font-size:11.5px}
+.reqs{display:flex;gap:12px;font-size:11px;margin-bottom:9px;min-height:15px}
+.reqs a{color:var(--o);text-decoration:none;font-weight:600}
+.qa{height:32px;border-radius:6px;background:var(--o);color:#fff;font-size:12.5px;font-weight:600;
+    display:flex;align-items:center;justify-content:center}
+.cd.fm .th{background:#f7f5fb}
+.gate{font-size:11px;color:var(--violet);background:var(--violet-bg);border:1px solid var(--violet-line);
+      border-radius:6px;padding:7px 8px;margin-bottom:8px;line-height:1.35}
+.ab{height:32px;border-radius:6px;background:#fff;color:var(--violet);border:1px solid #cfc3ea;
+    font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center}
+
+/* rail */
+.wrap{display:flex;gap:16px;padding:15px 20px 20px;align-items:flex-start}
+.rail{width:230px;flex:0 0 230px;border:1px solid var(--line);border-radius:9px;padding:13px 14px}
+.rail h5{margin:0 0 8px;font-size:12px;font-weight:700}
+.rail h5.two{margin-top:14px}
+.opt{display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;color:#3a3d45}
+.bx{width:12px;height:12px;border-radius:3px;border:1.5px solid #c3c7cf;flex:0 0 auto}
+.bx.on{background:var(--o);border-color:var(--o);position:relative}
+.bx.on::after{content:"✓";color:#fff;font-size:8px;position:absolute;left:2px;top:-2px}
+.cnt{margin-left:auto;color:#aeb2ba;font-size:10.5px}
+.g3{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+/* cart */
+.grp{border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:12px}
+.gh{display:flex;align-items:center;gap:9px;padding:9px 13px;background:#fafbfc;border-bottom:1px solid var(--line)}
+.gh b{font-size:13px}
+.chp{font-size:10.5px;background:#fff;border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--muted)}
+.chp b{color:var(--ink);font-size:10.5px}
+.gc{margin-left:auto;font-size:11px;color:var(--muted);background:#eef1f5;border-radius:5px;padding:2px 8px}
+.ln{display:flex;gap:12px;padding:12px 13px;border-bottom:1px solid #f1f2f5;align-items:flex-start}
+.ln:last-child{border-bottom:0}
+.lt{width:48px;height:48px;border-radius:5px;background:#f5f6f8;flex:0 0 auto}
+.lm{flex:1;min-width:0}
+.lnm{font-size:13px;font-weight:600;margin-bottom:3px}
+.lbr{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+.lpr{font-size:12.5px}
+.lpr s{color:#b6b9c0;margin-right:4px}
+.lpr b{color:var(--o)}
+.prm{font-size:10.5px;color:var(--violet);background:var(--violet-bg);border-radius:5px;padding:2px 7px;
+     display:inline-block;margin-top:5px}
+.qt{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:0 0 auto}
+.qt span{width:26px;height:29px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.qt b{width:32px;text-align:center;font-size:13px}
+.ql{font-size:10.5px;color:var(--muted);text-align:center;margin-top:2px}
+.ls{width:72px;text-align:right;font-size:13.5px;font-weight:600;flex:0 0 auto}
+.dl{width:29px;height:29px;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;
+    justify-content:center;color:#9aa0a8;font-size:12px;flex:0 0 auto}
+.sel{margin-top:6px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--grey-line);
+     border-radius:6px;padding:4px 9px;font-size:11.5px;background:#fff}
+.sel::after{content:"⌄";color:var(--muted)}
+.sel .l{color:var(--muted)}
+.hint{font-size:11px;color:var(--o);margin-top:5px}
+.aside{width:250px;flex:0 0 250px;border:1px solid var(--line);border-radius:9px;padding:14px 15px}
+.sr{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0}
+.sr.tt{font-size:16px;font-weight:700;border-top:1px solid var(--line);margin-top:7px;padding-top:10px}
+.info{background:#eef4fd;border:1px solid #cfe0f7;border-radius:7px;padding:9px 11px;font-size:11.5px;
+      color:#2a5b9a;line-height:1.45;margin:12px 0}
+.bt{height:38px;border-radius:999px;font-size:13.5px;font-weight:600;display:flex;align-items:center;
+    justify-content:center;width:100%}
+.bt.pri{background:var(--amber);color:#fff}
+.bt.o{background:var(--o);color:#fff}
+.bt.gh{background:var(--field);color:var(--ink)}
+.lk{display:block;text-align:center;font-size:12px;color:var(--o);margin-top:10px;font-weight:600}
+
+/* panel */
+.stage{padding:18px;background:#f7f8fa;display:flex;justify-content:center}
+.pnl{width:470px;background:#fff;border:1px solid var(--line);border-radius:11px;
+     box-shadow:0 10px 28px rgba(25,25,50,.13);overflow:hidden}
+.ph{padding:17px 20px 0}
+.ph h4{margin:0;font-size:17px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink)}
+.ph p{margin:5px 0 0;font-size:12px;color:var(--muted)}
+.pb{padding:15px 20px 4px}
+.fr{margin-bottom:11px}
+.fr label{display:block;font-size:11.5px;font-weight:600;margin-bottom:4px}
+.rq{color:var(--err);font-weight:400}
+.fd{height:37px;border-radius:7px;background:var(--field);border:1px solid transparent;display:flex;
+    align-items:center;padding:0 12px;font-size:13.5px}
+.fd.ph2{color:#9aa0a8}
+.fd.sl::after{content:"⌄";margin-left:auto;color:var(--muted)}
+.fd.ok{background:#fff;border-color:var(--grey-line)}
+.eye{margin-left:auto;color:#8d929b;font-size:13px}
+.tw{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.pf{padding:13px 20px 18px;display:flex;gap:9px}
+.sb{height:36px;border-radius:8px;padding:0 18px;font-size:13px;font-weight:600;display:inline-flex;
+    align-items:center;justify-content:center}
+.sb.pri{background:var(--amber);color:#fff}
+.sb.pri.dis{background:#e8e3d8;color:#a9a396}
+.sb.gh{background:var(--field);color:var(--ink)}
+.rt{margin-left:auto}
+
+/* toast */
+.tst{margin:14px 20px 18px;background:#fff;border:1px solid var(--line);border-radius:10px;
+     box-shadow:0 8px 22px rgba(25,25,50,.13);padding:12px 15px;display:flex;gap:10px;
+     align-items:flex-start;width:420px}
+.tk{width:24px;height:24px;border-radius:50%;background:#e9f7ec;color:#2f8f3f;display:flex;
+    align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
+.tmn{font-size:13px;font-weight:600;margin-bottom:3px}
+.tsh{font-size:12px;color:var(--muted);white-space:nowrap}
+.tsh b{color:var(--ink);font-weight:600}
+.tlk{font-size:12px;color:var(--o);font-weight:600;margin-top:7px;display:inline-block}
+
+/* empty */
+.emp{padding:36px 20px 12px;text-align:center}
+.emp h4{margin:0 0 5px;font-size:16px;text-transform:none;letter-spacing:0;color:var(--ink)}
+.emp p{margin:0 auto 14px;font-size:13px;color:var(--muted)}
+.emp .bt{display:inline-flex;width:auto;padding:0 22px}
+
+@media print{
+  .side{display:none}
+  .shell{display:block}
+  section{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="side">
+  <div class="brand"><b>Turnpike Build Spec</b><span>Buyer experience · v2 · 24 Aug 2026</span></div>
+  <a href="#read">Read this first</a>
+  <a class="grp">Header</a>
+  <a href="#logo" class="hot">1 · Logo crush (ship now)</a>
+  <a href="#bands">2 · Two bands</a>
+  <a href="#nav">3 · Nav changes</a>
+  <a href="#retract">4 · Retracting header</a>
+  <a class="grp">Sources</a>
+  <a href="#pills">5 · DC pills</a>
+  <a href="#firstmile">6 · First Mile</a>
+  <a href="#adddc">7 · Add DC panel</a>
+  <a class="grp">Flows</a>
+  <a href="#reg">8 · Registration</a>
+  <a href="#cards">9 · Cards</a>
+  <a href="#pdp">10 · PDP</a>
+  <a href="#cart">11 · Cart &amp; submit</a>
+  <a href="#rail">12 · Category rail</a>
+  <a class="grp">Edges</a>
+  <a href="#states">13 · Empty &amp; thin</a>
+  <a href="#dropped">14 · Dropped from scope</a>
+  <a href="#testing">15 · Testing</a>
+</nav>
+
+<div class="main">
+
+<div class="top">
+  <h1>Turnpike — Buyer Experience Build Spec</h1>
+  <p class="lede">Replaces the buyer-facing catalog and header. This is a design change, not a bug list — several items reverse earlier decisions, and the reasoning is given so the intent is clear rather than just the instruction.</p>
+  <div class="meta">
+    <span><b>To</b> Harsh / Kulin — Pennine Technolabs</span>
+    <span><b>From</b> David Abrahams — iLevel Group LLC</span>
+    <span><b>Env</b> shopturnpikstg.wpenginepowered.com</span>
+    <span><b>Companion</b> turnpike-order-integrity.html — read first, it blocks launch</span>
+  </div>
+</div>
+
+<!-- ============ READ FIRST ============ -->
+<section id="read">
+  <h2><span class="num">§0</span>Read this first</h2>
+  <p class="slede">One organising principle: <b>a buyer sees only what they can order, and the header shows them at a glance what that is.</b> Everything below follows from it.</p>
+
+  <h3>Release order</h3>
+  <table>
+    <tr><th style="width:16%">Release</th><th>Contents</th><th style="width:18%">Depends on</th></tr>
+    <tr><td><b>1 — ship first</b></td><td>Logo fix (§1) · Nav changes (§3) · PDP layout (§10) · Continuation screens (§11)</td><td>Nothing</td></tr>
+    <tr><td><b>2 — core</b></td><td>Two-band header + retract (§2, §4) · DC pills (§5) · Add DC panel (§7) · Cards (§9)</td><td>Each other</td></tr>
+    <tr><td><b>3 — follows</b></td><td>Registration (§8) · Cart DC selector (§11) · Rail (§12) · Empty states (§13)</td><td>Release 2</td></tr>
+  </table>
+
+  <div class="box stop"><b class="t">Hard constraint</b>
+    The DC pill band (§5) <b>must not ship without the retracting header</b> (§4). The band adds ~46px of permanent vertical space; the retract is what pays for it. Shipping the band alone recreates the exact problem that caused the pills to be removed in the first place.</div>
+
+  <h3>What is being removed</h3>
+  <table>
+    <tr><th style="width:24%">Thing</th><th>Why it goes</th></tr>
+    <tr><td>Manage DCs nav item</td><td>Pills replace viewing and toggling; the Add DC pill replaces adding</td></tr>
+    <tr><td>OI / MCB / TOTAL chips on cards</td><td>Deal construction, not a buyer decision. Moves to PDP and cart line</td></tr>
+    <tr><td>Ships via on cards &amp; PDP</td><td>Routing is confirmed by toast and changed in the cart</td></tr>
+    <tr><td>DC selector on cards &amp; PDP</td><td>The choice can't be answered until the buyer sees the rest of their cart</td></tr>
+    <tr><td><code>dc-popup-box</code> repeater</td><td>Replaced by the registration Step 3 component (§7)</td></tr>
+    <tr><td>Additional Information tab</td><td>Stock WooCommerce scaffolding</td></tr>
+    <tr><td>Terms checkbox at checkout</td><td>Agreed once at registration (§8)</td></tr>
+    <tr><td>Sidebar show/hide toggle</td><td>Collapsed rail hides applied filter state</td></tr>
+    <tr><td>Discovery &amp; pre-commit</td><td>Out of scope — see §14</td></tr>
+  </table>
+</section>
+
+<!-- ============ 1 LOGO ============ -->
+<section id="logo">
+  <h2><span class="num">§1</span>Logo crush — bug, ship immediately</h2>
+  <p class="slede">The logo renders at <b>18 × 5px</b> at a 1033px viewport. Source image is 2560 × 677. Under 15 minutes to fix.</p>
+
+  <div class="box why"><b class="t">Cause</b>
+    <code>.site-header .header-top</code> is <code>display:flex</code> with four children. Three cannot shrink, so <code>.header-logo</code> absorbs 100% of the overflow — and its <code>img</code> carries <code>max-width:100%</code>, so it scales down without limit.</div>
+
+  <table>
+    <tr><th>Flex child</th><th style="width:18%">flex-shrink</th><th style="width:40%">Width @1033px</th></tr>
+    <tr><td><code>.header-logo</code></td><td>1</td><td><b style="color:var(--err)">18px — crushed</b></td></tr>
+    <tr><td><code>.header-nav</code></td><td>1</td><td>562px (content will not compress)</td></tr>
+    <tr><td><code>.header-actions</code></td><td>0</td><td>388px</td></tr>
+    <tr><td><code>.mobile-menu-btn</code></td><td>0</td><td>0px</td></tr>
+  </table>
+
+  <h4>Measured degradation</h4>
+  <table>
+    <tr><th style="width:26%">Viewport</th><th style="width:20%">Logo width</th><th>State</th></tr>
+    <tr><td>≥ 1192px</td><td>150px</td><td>Correct</td></tr>
+    <tr><td>1141px</td><td>105px</td><td>Degraded</td></tr>
+    <tr><td>1033px</td><td>18px</td><td>Destroyed</td></tr>
+    <tr><td>≤ 1024px</td><td>150px</td><td>Correct — nav collapses to hamburger, pressure released</td></tr>
+  </table>
+  <p><b>Affected band ≈ 1025–1190px.</b> Includes any non-maximized window, and 1366×768 laptops at 125% Windows scaling (≈1093 CSS px) — common in independent retail back offices.</p>
+
+  <h4>Fix</h4>
+  <pre><span class="c">/* the only change needed */</span>
+.site-header .header-top .header-logo { <span class="k">flex</span>: 0 0 150px; }</pre>
+  <p>The existing <code>@media (max-width:1199px)</code> rule setting <code>width:150px</code> is correct and stays — it just needs <code>flex-shrink:0</code> alongside it.</p>
+
+  <div class="acc"><h4>Acceptance</h4><ul>
+    <li>Logo renders at 150px at 1030, 1100, 1150, 1190 and 1440</li>
+    <li>No horizontal scrollbar between 1024 and 1440</li>
+  </ul></div>
+</section>
+
+<!-- ============ 2 BANDS ============ -->
+<section id="bands">
+  <h2><span class="num">§2</span>Two bands</h2>
+  <p class="slede">Logo and nav stay on <b>one line</b>, aligned as on the current site. Only the DC pills get their own band. Nothing moves in PHP — the fix is flex-basis on the logo plus removing one nav item.</p>
+
+  <div class="mock">
+    <div class="cap">Target header at <b>1180px</b> — total height <b>~104px</b>, shorter than today's 109px despite gaining a row.</div>
+    <div class="vp">
+      <div class="hdr">
+        <div class="b1"><div class="lg">Turnpike</div>
+          <nav class="nv"><a class="cur">Shop</a><a class="hot">New Arrivals</a><a class="hot">Sale</a><a>Brands</a><a>Categories ⌄</a><a>Support</a></nav>
+          <div class="ac"><div class="ic">⌕</div><div class="ic">🔖</div><div class="cb2">🛍 (0)</div>
+            <div class="av">FL</div></div></div>
+        <div class="b2"><span class="pl">Shopping from</span>
+          <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+          <span class="pill act"><i class="hl"></i><span class="ds" style="color:var(--violet)">First Mile</span><span style="font-weight:700">· Apply</span></span>
+          <span class="pill add">+ Add DC</span></div>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <tr><th style="width:14%">Band</th><th style="width:40%">Contents</th><th>Behaviour</th></tr>
+    <tr><td><b>1</b> ~58px</td><td>logo · nav · search · saved · cart · account</td><td>logo <code>flex: 0 0 150px</code>, nav left-aligned beside it, actions right</td></tr>
+    <tr><td><b>2</b> ~46px</td><td>DC pills (§5)</td><td><code>flex-wrap</code> — wraps, never hidden</td></tr>
+  </table>
+
+  <h4>Measured fit</h4>
+  <p>Removing Manage DCs and pinning the logo frees enough width for one line:</p>
+  <table>
+    <tr><th style="width:34%">Account block</th><th>logo</th><th>nav</th><th>actions</th><th>Needs</th><th>Holds to</th></tr>
+    <tr><td>Full — avatar + name + email</td><td>150</td><td>504</td><td>357</td><td>~1091px</td><td><b>1100px</b></td></tr>
+    <tr><td>Compact — avatar only</td><td>150</td><td>504</td><td>199</td><td>~933px</td><td><b>990px</b></td></tr>
+  </table>
+  <ul>
+    <li>Below <b>~1100px</b>, collapse the account block to the avatar alone. Name and email move into its dropdown. One media query, no structural change.</li>
+    <li>Below <b>1024px</b> the nav collapses to hamburger as today. The pill band stays visible.</li>
+    <li>Nav keeps <code>flex-wrap</code> as a safety net — a future nav item wraps rather than crushing a sibling.</li>
+  </ul>
+
+  <div class="box why"><b class="t">Reference</b>
+    Faire.com runs a 104px header at the identical <b>1024px</b> breakpoint — all 11 nav links on one line at 1033px and 1024px, collapsing to a 61px single row with hamburger at 991px. The breakpoint was never the problem; the shrinkable logo was.</div>
+</section>
+
+<!-- ============ 3 NAV ============ -->
+<section id="nav">
+  <h2><span class="num">§3</span>Nav changes</h2>
+  <ul>
+    <li><b>Rename Home → Shop.</b> Confirm it resolves to the catalog — it already lands on the product grid, so the current label is wrong.</li>
+    <li><b>Remove Manage DCs entirely.</b> Pills replace viewing and toggling; the Add DC pill replaces adding.</li>
+  </ul>
+  <p>Result: <code>Shop · New Arrivals · Sale · Brands · Categories · Support</code> — six items, down from seven.</p>
+  <div class="box stop"><b class="t">Currently inconsistent</b>
+    Nav differs by template. <code>Categories</code> appears on shop pages but not on cart, checkout, or the registration thank-you. It must be identical on every template.</div>
+</section>
+
+<!-- ============ 4 RETRACT ============ -->
+<section id="retract">
+  <h2><span class="num">§4</span>Directional retracting header</h2>
+  <p class="slede">Buyer laptops commonly render <b>~625 CSS px</b> of viewport height. A static two-band header consumes ~17% of that permanently.</p>
+
+  <table>
+    <tr><th style="width:34%">Scroll state</th><th>Wrapper inline style</th></tr>
+    <tr><td>At top</td><td><code>top: 0px</code></td></tr>
+    <tr><td>Scrolling <b>down</b></td><td><code>top: -{measuredHeaderHeight}px</code></td></tr>
+    <tr><td>Scrolling <b>up</b></td><td><code>top: 0px</code></td></tr>
+  </table>
+
+  <ul>
+    <li>A wrapper div is <code>position:sticky</code> with <code>transition</code> on <code>top</code>, 200ms ease-out. The header itself stays <code>position:relative</code> inside it.</li>
+    <li><b>Sticky rather than fixed</b> keeps it in normal flow — no layout jump, no scroll-position correction.</li>
+    <li>Header height is measured once and exposed as a CSS variable. Every downstream sticky offset reads it (§12). <b>Do not hardcode.</b></li>
+    <li>Never retract within ~160px of the top. Hold open while a dropdown is expanded or a control inside has focus. Respect <code>prefers-reduced-motion</code>.</li>
+  </ul>
+
+  <div class="box why"><b class="t">Note</b>
+    <code>position:sticky</code> fails silently inside an ancestor with <code>overflow: hidden|auto|scroll</code>. Check the ancestor chain before debugging anything else.</div>
+
+  <div class="acc"><h4>Acceptance</h4><ul>
+    <li>Logo, nav and pills all visible on one line at 1030, 1100, 1150, 1190, 1440</li>
+    <li>Account block collapses to avatar below ~1100px without the nav wrapping</li>
+    <li>Header retracts on scroll-down, returns on scroll-up, no content jump</li>
+    <li>Nav identical on shop, PDP, cart, checkout and post-registration</li>
+  </ul></div>
+</section>
+
+<!-- ============ 5 PILLS ============ -->
+<section id="pills">
+  <h2><span class="num">§5</span>DC pills</h2>
+  <p class="slede">Band 2. Every source the buyer holds, plus an Add DC pill. Replaces the Manage DCs dropdown.</p>
+
+  <div class="box why"><b class="t">Why pills, not a dropdown</b>
+    The dropdown made active state invisible — a buyer could not tell at a glance which DCs were live without opening a menu. Pills make state readable <b>without interaction</b>. Any implementation that hides state behind a control has missed the point.</div>
+
+  <div class="mock">
+    <div class="cap">Left to right: <b>new buyer</b> · <b>established, Palko approved</b> · <b>one source toggled off</b> · <b>all off</b></div>
+    <div class="vp">
+      <div class="b2" style="border-top:0"><span class="pl">Shopping from</span>
+        <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+        <span class="pill act"><i class="hl"></i><span class="ds" style="color:var(--violet)">First Mile</span><span style="font-weight:700">· Apply</span></span>
+        <span class="pill add">+ Add DC</span></div>
+      <div class="b2"><span class="pl">Shopping from</span>
+        <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+        <span class="pill"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+        <span class="pill"><i class="dt"></i><span class="ds">Palko</span><span class="dc">· Warehouse</span></span>
+        <span class="pill fm"><i class="dt"></i><span class="ds">First Mile</span></span>
+        <span class="pill add">+ Add DC</span></div>
+      <div class="b2"><span class="pl">Shopping from</span>
+        <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+        <span class="pill off"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+        <span class="pill fm"><i class="dt"></i><span class="ds">First Mile</span></span>
+        <span class="pill add">+ Add DC</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:5px">Hidden from view. Your cart and account are unchanged.</span></div>
+      <div class="b2"><span class="pl">Shopping from</span>
+        <span class="pill off"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+        <span class="pill off"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+        <span class="pill off"><i class="dt"></i><span class="ds">First Mile</span></span>
+        <span class="pill add">+ Add DC</span></div>
+    </div>
+  </div>
+
+  <h3>Toggle behaviour</h3>
+  <table>
+    <tr><th style="width:16%">State</th><th style="width:42%">Appearance</th><th>Tap</th></tr>
+    <tr><td>On</td><td>Cream fill, orange distributor, green dot</td><td>Toggles off</td></tr>
+    <tr><td>Off</td><td>Grey fill, hollow dot, muted text</td><td>Toggles on</td></tr>
+  </table>
+  <ul>
+    <li><b>No floor.</b> All pills may be toggled off. Result is an empty grid with a recovery message (§13) — a legitimate state, not an error.</li>
+    <li>Toggling is a <b>view filter on the catalog query only</b>. It must not re-route, remove or alter cart lines. A buyer with cart lines at a DC they toggle off keeps those lines untouched.</li>
+    <li>Toggle state is <b>per-session and non-durable</b>. On every new login all held pills are lit, regardless of how the buyer left them. Reset on <b>session start</b>, not page load — resetting per page load would make the toggle useless.</li>
+  </ul>
+
+  <h3>Add DC pill</h3>
+  <p>A dashed pill at the end of the distributor pills, opening the Add DC panel (§7). It is the <b>only</b> non-lit element in the row, so grey is never ambiguous. It is also the repeat mechanism: adding two DCs means tapping it twice — which is why the panel handles one DC at a time.</p>
+</section>
+
+<!-- ============ 6 FIRST MILE ============ -->
+<section id="firstmile">
+  <h2><span class="num">§6</span>First Mile</h2>
+  <p class="slede">A Palko drop-ship program — ordered by the case, freight on the brand, <b>not DC-scoped</b>. Only some brands are enrolled.</p>
+
+  <p>Palko appears in the distributor select like any other. Its DC select has <b>two options: Warehouse and First Mile</b>. A buyer with a Palko account may add either or both using the same account number — no separate approval. Two rows means two pills, which is correct: they are separate fulfillment paths generating separate POs.</p>
+
+  <table>
+    <tr><th style="width:24%">Buyer</th><th style="width:30%">Pill</th><th>First Mile products</th></tr>
+    <tr><td>Has Palko account</td><td>Lit, violet</td><td>Orderable, priced normally</td></tr>
+    <tr><td>No Palko account</td><td>Dashed — <code>First Mile · Apply</code></td><td>Hidden until preview toggled on; then visible, unpriced</td></tr>
+    <tr><td>Applied, pending</td><td>Dashed — <code>First Mile · Pending</code></td><td>Same as above</td></tr>
+  </table>
+
+  <h3>Preview toggle — default off</h3>
+  <p>For a buyer without a Palko account the pill is <b>always present</b>, dashed. This is standing placement no other distributor gets — there is no permanently dashed UNFI pill — because First Mile is an iLevel program rather than a buyer's choice of distributor.</p>
+  <p>The pill is a preview toggle defaulting <b>off</b>. First Mile products do not appear in the default grid, which stays clean and fully orderable. Tapping the pill turns preview on and First Mile products appear, unpriced, with the Apply action.</p>
+
+  <div class="mock">
+    <div class="cap">Preview <b>on</b>, unapplied buyer — First Mile cards render everything except numbers.</div>
+    <div class="vp">
+      <div class="b2" style="border-top:0"><span class="pl">Shopping from</span>
+        <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+        <span class="pill fm"><i class="dt"></i><span class="ds">First Mile</span><span class="dc">· preview</span></span>
+        <span class="pill add">+ Add DC</span></div>
+      <div class="body2"><div class="grid">
+        <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Buddha Tea</div>
+          <div class="pn">4th Chakra Tea</div><div class="pr">SRP <s>$8.99</s> <b>$3.60</b> <em>/ Unit</em></div>
+          <div class="reqs"><a>Request Sample</a><a>Request Placement</a></div><div class="qa">+ Add</div></div>
+        <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Bianco DiNapoli</div>
+          <div class="pn">Organic Crushed Puree</div><div class="pr">WHLSE <b>$40.00</b> <em>/ Case</em></div>
+          <div class="reqs"><a>Request Sample</a></div><div class="qa">+ Add</div></div>
+        <div class="cd fm"><div class="bm">🔖</div><div class="th">first mile</div><div class="br">Alaffia</div>
+          <div class="pn">Everyday Shea Lotion</div>
+          <div class="gate">Pricing available once your Palko account is approved.</div><div class="ab">Apply for Palko</div></div>
+        <div class="cd fm"><div class="bm">🔖</div><div class="th">first mile</div><div class="br">Blendtopia</div>
+          <div class="pn">Detox Smoothie Kit</div>
+          <div class="gate">Pricing available once your Palko account is approved.</div><div class="ab">Apply for Palko</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="box stop"><b class="t">Field-level gate, not query-level</b>
+    Products stay in the grid; <b>only the pricing block and add control change</b>. Do not create a second catalog code path.</div>
+
+  <p>Applications are <b>collected by Turnpike and forwarded to iLevel</b>, not linked out to Palko. If applications leave the site there is no way to know a buyer applied, and no way to show a pending state.</p>
+
+  <div class="acc"><h4>Acceptance</h4><ul>
+    <li>New buyer sees exactly one lit pill plus Add DC immediately after registration, no interaction</li>
+    <li>Toggling a pill off removes that source's products and leaves the cart unchanged</li>
+    <li>All pills off produces the recovery state, not an error or blank page</li>
+    <li>All held pills lit again at next login</li>
+    <li>Buyer with no Palko account sees dashed <code>First Mile · Apply</code> at every login, and no First Mile products in the default grid</li>
+    <li>One Palko account number added as both Warehouse and First Mile produces two independently toggleable pills</li>
+  </ul></div>
+</section>
+
+<!-- ============ 7 ADD DC ============ -->
+<section id="adddc">
+  <h2><span class="num">§7</span>Add DC panel</h2>
+  <p class="slede">The existing <code>dc-popup-box</code> with <code>dc-repeater-row</code> and <code>dc-add-btn</code> is <b>replaced, not patched</b>. It is built as a list manager, which is why it reads as confusing — the buyer opens it to do one thing and is shown an interface implying several.</p>
+
+  <div class="box ok"><b class="t">One component, two contexts</b>
+    The Add DC panel and registration Step 3 (§8) are the <b>same component</b>. Not similar — identical, so they cannot drift when one is edited. At registration it carries first-run copy; from the pill it does not.</div>
+
+  <div class="mock">
+    <div class="cap">From the pill (left) and at registration (right) — identical fields, identical order.</div>
+    <div class="vp" style="display:flex;min-width:1000px">
+      <div class="stage" style="flex:1">
+        <div class="pnl" style="width:430px">
+          <div class="ph"><h4>Add a DC</h4></div>
+          <div class="pb">
+            <div class="tw">
+              <div class="fr"><label>Distributor <span class="rq">*</span></label><div class="fd sl ok">UNFI</div></div>
+              <div class="fr"><label>Distribution Center <span class="rq">*</span></label><div class="fd sl ok">Moreno Valley</div></div>
+            </div>
+            <div class="fr"><label>Account Number <span class="rq">*</span></label><div class="fd ok">8675309<span class="eye">👁</span></div></div>
+            <div class="fr"><label>Confirm Account Number <span class="rq">*</span></label><div class="fd ok">8675309<span class="eye">👁</span></div></div>
+          </div>
+          <div class="pf"><span class="sb gh">Cancel</span><span class="sb pri rt">Add</span></div>
+        </div>
+      </div>
+      <div class="stage" style="flex:1;border-left:1px solid var(--line)">
+        <div class="pnl" style="width:430px">
+          <div class="ph"><h4>Add your first DC</h4><p>Just one to open your account — you can add more anytime.</p></div>
+          <div class="pb">
+            <div class="tw">
+              <div class="fr"><label>Distributor <span class="rq">*</span></label><div class="fd sl ok">KeHE</div></div>
+              <div class="fr"><label>Distribution Center <span class="rq">*</span></label><div class="fd sl ok">Bloomington – DC 16</div></div>
+            </div>
+            <div class="fr"><label>Account Number <span class="rq">*</span></label><div class="fd ok">8675309<span class="eye">👁</span></div></div>
+            <div class="fr"><label>Confirm Account Number <span class="rq">*</span></label><div class="fd ok">8675309<span class="eye">👁</span></div></div>
+          </div>
+          <div class="pf"><span class="sb gh">← Back</span><span class="sb pri rt">Sign Up</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Rules</h3>
+  <ul>
+    <li><b>One DC per submission.</b> No repeater rows, no add-another-row control.</li>
+    <li><b>Account confirmation is plain double-entry</b> — do the two strings match, exactly as the password fields work. No external validation in this release.</li>
+    <li>Match on exact string after <b>trimming whitespace only</b>. Do not normalise case or strip characters — KeHE and UNFI account numbers carry real suffixes, and transforming them creates a mismatch between what the buyer sees and what appears on the PO.</li>
+    <li><b>Store the number exactly as entered.</b></li>
+    <li>Both number fields get a <b>show/hide eyeball</b>, same control as the password fields. Buyers are copying a string off an invoice into two fields that must match — they should be able to check it against the paper.</li>
+    <li><b>Cancel, not help.</b> Opening a distributor account is between the buyer and the distributor, not a Turnpike flow.</li>
+    <li>DC select is disabled until a distributor is chosen, reading <code>Select distributor first</code>.</li>
+    <li><b>Add is disabled until valid.</b></li>
+    <li>On success: panel closes, the new pill appears lit with a brief highlight.</li>
+    <li>First DC added is flagged <b>primary</b> automatically. A "make primary" control appears on rows only once a buyer holds more than one. If a primary DC is removed, the flag moves to another row.</li>
+  </ul>
+</section>
+
+<!-- ============ 8 REGISTRATION ============ -->
+<section id="reg">
+  <h2><span class="num">§8</span>Registration</h2>
+  <p class="slede">Buyers are granted access on registration. <b>There is no approval queue</b> — accounts may be revoked afterwards if needed.</p>
+
+  <div class="box stop"><b class="t">Live and wrong</b>
+    The thank-you page reads <i>"Turnpike opens for business before the end of the month and because you registered early, you'll be one of the first we notify when it goes live."</i> That is leftover pre-launch messaging — the same account is simultaneously logged in and browsing the catalog. Replace with confirmation plus entry.</div>
+
+  <h3>Step 2 — Store Details</h3>
+  <table>
+    <tr><th style="width:24%">Field</th><th style="width:20%">Action</th><th>Why</th></tr>
+    <tr><td>Store Name</td><td>Keep, required</td><td>Identity</td></tr>
+    <tr><td>Store Size</td><td>Keep, required</td><td>Order size and SKU capacity — the only real segmentation variable for a new buyer</td></tr>
+    <tr><td>Number of locations</td><td><b>Make optional</b></td><td>Nothing in the flow reads it. Retained for research only</td></tr>
+    <tr><td>Store Type</td><td><b style="color:var(--err)">Remove</b></td><td>Turnpike is indie-only; the population is ~98% independent. Chain signal is already carried by <i>26+ locations</i> and <i>Over 20,000 sq ft</i></td></tr>
+    <tr><td>Shipping address</td><td>Keep, required</td><td>Routing; ZIP preselects the nearest DC on Step 3</td></tr>
+  </table>
+
+  <h3>Step 3 — First DC</h3>
+  <p>Stays its own page. Steps 1 and 2 collect facts about the buyer; Step 3 creates their first source. Uses the Add DC component (§7) with first-run copy:</p>
+  <ul>
+    <li>Heading: <b>Add your first DC</b></li>
+    <li>Sub: <b>Just one to open your account — you can add more anytime.</b></li>
+    <li>On success: <b>Added. Add another now, or do it later from Add DC in your header.</b></li>
+  </ul>
+  <p>That last line names the exact control the buyer will look for, which is what makes the Add DC pill legible when they reach the catalog.</p>
+
+  <div class="box ok"><b class="t">Terms once only</b>
+    Terms and Privacy are agreed at <b>Step 3, at account creation</b>. The checkbox is <b>removed from the review/checkout screen</b> — a buyer who agreed at signup should not re-consent on every order. This also removes a stock WooCommerce leak.</div>
+
+  <h3>Other</h3>
+  <ul>
+    <li><b>Normalise email to lowercase on save.</b> A capitalised TLD was observed (<code>david@texasilb.Com</code>). It will deliver, but any exact-match lookup downstream — Klaviyo dedupe, crosswalk, routing — will split the record.</li>
+    <li>Store Size renders as a raw browser select while Step 3 uses the styled control. <b>Unify on the styled control.</b></li>
+    <li>The number-of-locations dropdown overlaps and hides the Street address field beneath it.</li>
+    <li>Confirm whether reCAPTCHA on Step 3 is wanted given the goal is a fast signup. Flagging, not prescribing.</li>
+  </ul>
+</section>
+
+<!-- ============ 9 CARDS ============ -->
+<section id="cards">
+  <h2><span class="num">§9</span>Product cards</h2>
+  <p class="slede">Cards currently carry <b>six renderings of the same discount</b>: struck SRP, discounted price, a 60% Off badge, and OI / MCB / TOTAL chips. Roughly 90px per card spent restating one number.</p>
+
+  <div class="box why"><b class="t">Why the chips go</b>
+    OI and MCB are <b>deal construction</b> — they matter to iLevel and the brand at reconciliation, not to a buyer scanning a grid. The buyer's question is "is this cheaper than usual", and <code>SRP $8.99 → $3.60</code> answers it.</div>
+
+  <div class="mock">
+    <div class="cap">Four different data situations — promo, case pricing, no markers, First Mile gate — <b>one card shape, no reflow</b>.</div>
+    <div class="vp"><div class="body2"><div class="grid">
+      <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Buddha Tea</div>
+        <div class="pn">4th Chakra Tea</div><div class="pr">SRP <s>$8.99</s> <b>$3.60</b> <em>/ Unit</em></div>
+        <div class="reqs"><a>Request Sample</a><a>Request Placement</a></div><div class="qa">+ Add</div></div>
+      <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Bianco DiNapoli</div>
+        <div class="pn">Organic Crushed Puree Tomatoes</div><div class="pr">WHLSE <b>$40.00</b> <em>/ Case</em></div>
+        <div class="reqs"><a>Request Sample</a></div><div class="qa">+ Add</div></div>
+      <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Skoy</div>
+        <div class="pn">Skoy Scrub – 2CT</div><div class="pr">WHLSE <b>$18.60</b> <em>/ Case</em></div>
+        <div class="reqs"></div><div class="qa">+ Add</div></div>
+      <div class="cd fm"><div class="bm">🔖</div><div class="th">first mile</div><div class="br">Alaffia</div>
+        <div class="pn">Everyday Shea Lotion</div>
+        <div class="gate">Pricing available once your Palko account is approved.</div><div class="ab">Apply for Palko</div></div>
+    </div></div></div>
+  </div>
+
+  <h3>Final card contents</h3>
+  <table>
+    <tr><th style="width:34%">Element</th><th>Note</th></tr>
+    <tr><td>Image</td><td></td></tr>
+    <tr><td>Brand</td><td></td></tr>
+    <tr><td>Product name</td><td>Links to PDP</td></tr>
+    <tr><td><code>SRP $8.99  $3.60 / Unit</code></td><td>Struck original where on deal</td></tr>
+    <tr><td>Request Sample · Request Placement</td><td><b>Text links, not buttons.</b> Rendered only where available for that product</td></tr>
+    <tr><td>Quick add</td><td>Adds one unit without leaving the grid</td></tr>
+    <tr><td>Bookmark</td><td>Wishlist</td></tr>
+  </table>
+
+  <h3>Removed from cards</h3>
+  <ul>
+    <li>OI / MCB / TOTAL chips → PDP and cart line, where they already render correctly</li>
+    <li>Redundant 60% Off badge — the struck price already says it</li>
+    <li><b>Ships via label — removed entirely</b>, regardless of how many sources are lit</li>
+    <li><b>DC selector — removed.</b> On a card the buyer doesn't yet know what else is in their cart, so choosing a DC there is a guess. Also: the open dropdown currently overlays and hides Add to cart</li>
+    <li>Quantity stepper → cart, where quantity is editable anyway</li>
+  </ul>
+
+  <h3>Add-to-cart toast</h3>
+  <p>With no source label on the card, the buyer learns where the line landed <b>at the moment it lands</b>:</p>
+  <div class="mock">
+    <div class="cap">Multi-source buyer (top) and single-source buyer (bottom) — the <b>Ships from</b> line is omitted when only one source is lit.</div>
+    <div class="vp" style="min-width:600px">
+      <div class="tst"><div class="tk">✓</div><div>
+        <div class="tmn">Added — Organic Crushed Puree</div>
+        <div class="tsh">🚚 Ships from <b>KeHE · Bloomington – DC 16</b></div>
+        <div class="tsh" style="margin-top:3px;font-size:11px">Grouped with 1 other item · change in cart</div>
+        <span class="tlk">View cart →</span></div></div>
+      <div class="tst" style="width:300px"><div class="tk">✓</div><div>
+        <div class="tmn">Added — 4th Chakra Tea</div>
+        <span class="tlk" style="margin-top:4px">View cart →</span></div></div>
+    </div>
+  </div>
+  <ul>
+    <li>Bottom-right, auto-dismiss after ~4 seconds, close control available</li>
+    <li><code>Ships from</code> line renders only when <b>2 or more sources are lit</b></li>
+    <li>Second line at the same source adds <code>Grouped with N other items · change in cart</code></li>
+    <li>Card button flips to <code>✓ Added</code> and stays, so a buyer scanning back up the grid can see what they picked up</li>
+  </ul>
+</section>
+
+<!-- ============ 10 PDP ============ -->
+<section id="pdp">
+  <h2><span class="num">§10</span>Product detail page</h2>
+
+  <h3>The gap below the image</h3>
+  <p>The gallery/summary row <b>stretches both columns to equal height</b>. The summary column runs out of content first, leaving a large empty region that pushes everything below it down. Categories and Brand are pinned to the bottom of that stretched row.</p>
+  <div class="box stop"><b class="t">Do not</b>
+    Do not fix this with negative margin, a fixed height, or a top-margin adjustment on the tab box. Those treat the symptom.</div>
+  <ul>
+    <li>Change the gallery/summary row to <b>size to content</b> rather than stretch (<code>align-items: flex-start</code> rather than <code>stretch</code> or an equal-height rule)</li>
+    <li>Move Categories and Brand out of that row into a normal full-width block beneath it</li>
+  </ul>
+
+  <h3>Tabs</h3>
+  <ul>
+    <li><b>Remove the Additional Information tab</b> — stock WooCommerce scaffolding</li>
+    <li>With one tab remaining, <b>remove the tab strip</b>. A single heading over the text is correct; a lone tab implies others exist</li>
+    <li>The description currently appears <b>twice on the same page</b> — once in the summary column beside the price, once in the Description tab. Keep the tab copy, remove it from the summary column. The summary description is what pushes the buy controls below the fold</li>
+  </ul>
+
+  <h3>Structured specs replace stranded fields</h3>
+  <p><code>Unit Type: EA</code> currently sits beside the price, and case pack is buried in description prose. A buyer committing to a case needs these four numbers as structured rows:</p>
+  <div class="mock">
+    <div class="cap">Spec table, buy controls above the fold, description once.</div>
+    <div class="vp" style="min-width:820px"><div style="display:flex;gap:22px;padding:18px 20px">
+      <div style="width:280px;flex:0 0 280px"><div style="height:220px;border-radius:9px;background:#f5f6f8;
+        display:flex;align-items:center;justify-content:center;color:#c7cad0;font-size:11px">product image</div></div>
+      <div style="flex:1">
+        <span style="display:inline-block;border:1px solid var(--soft-line);color:var(--o);border-radius:999px;
+          padding:3px 11px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px">Skoy</span>
+        <div style="font-size:21px;font-weight:600;margin-bottom:8px">Skoy Scrub – 2CT</div>
+        <div style="font-size:13px;margin-bottom:11px">WHLSE <b style="font-size:23px;color:var(--o)">$18.60</b>
+          <span style="color:var(--muted)">/ Case</span> &nbsp;·&nbsp; <span style="color:var(--muted)">SRP $4.65 / Unit</span></div>
+        <table style="max-width:420px;margin-bottom:13px;font-size:12.5px;border:1px solid var(--line);border-radius:8px">
+          <tr><td style="width:110px;background:#fafbfc;color:var(--muted)">Case pack</td><td><b>4 units</b></td></tr>
+          <tr><td style="background:#fafbfc;color:var(--muted)">Inner pack</td><td><b>2 ct</b></td></tr>
+          <tr><td style="background:#fafbfc;color:var(--muted)">UPC</td><td><b>8 51242 00212 6</b></td></tr>
+          <tr><td style="background:#fafbfc;color:var(--muted)">Unit type</td><td><b>Each</b></td></tr>
+        </table>
+        <div style="display:flex;gap:9px;align-items:center;margin-bottom:9px">
+          <div class="qt" style="height:38px"><span>−</span><b>1</b><span>+</span></div>
+          <div style="flex:1;height:38px;border-radius:8px;background:var(--o);color:#fff;font-size:14px;
+            font-weight:600;display:flex;align-items:center;justify-content:center">Add to cart</div></div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;height:34px;border-radius:8px;border:1px solid var(--soft-line);color:var(--o);
+            font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Request Sample</div>
+          <div style="flex:1;height:34px;border-radius:8px;border:1px solid var(--soft-line);color:var(--o);
+            font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Request Placement</div>
+          <div style="width:36px;height:34px;border-radius:8px;border:1px solid var(--soft-line);color:var(--o);
+            display:flex;align-items:center;justify-content:center">🔖</div></div>
+      </div></div></div>
+  </div>
+
+  <h3>Also on the PDP</h3>
+  <ul>
+    <li>PDP wishlist is a <b>heart</b>; cards use a <b>bookmark</b>. Same function, two icons — <b>standardise on the bookmark</b></li>
+    <li>OI / MCB / TOTAL breakdown belongs here, and already renders</li>
+    <li><b>No Ships via and no DC selector</b> — same as cards</li>
+  </ul>
+</section>
+
+<!-- ============ 11 CART ============ -->
+<section id="cart">
+  <h2><span class="num">§11</span>Cart, review and submit</h2>
+  <p class="slede">The cart line is the <b>only</b> place a buyer can change where something ships from.</p>
+
+  <table>
+    <tr><th style="width:30%">Surface</th><th>Ships from</th></tr>
+    <tr><td>Product card</td><td>Not shown</td></tr>
+    <tr><td>PDP</td><td>Not shown</td></tr>
+    <tr><td>Add-to-cart toast</td><td>Named, not editable</td></tr>
+    <tr><td><b>Cart line</b></td><td><b>Editable — the only place</b></td></tr>
+    <tr><td>Review</td><td>Read-only</td></tr>
+    <tr><td>Submitted</td><td>Read-only</td></tr>
+  </table>
+
+  <div class="mock">
+    <div class="cap">Cart grouped by source. Account number on the <b>group header</b>, not beside the brand chip.</div>
+    <div class="vp"><div class="wrap">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:18px;font-weight:600;margin-bottom:2px">Your cart</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:13px">6 items · 2 sources · will generate 2 turnover documents</div>
+        <div class="grp">
+          <div class="gh">🚚 <b>UNFI · Moreno Valley</b><span class="chp">Account <b>7741208</b></span><span class="gc">2 products</span></div>
+          <div class="ln"><div class="lt"></div><div class="lm"><div class="lbr">Buddha Tea</div>
+            <div class="lnm">Alfalfa Leaf Tea</div><div class="lpr">SRP <s>$6.99</s> <b>$2.80</b> / Unit</div>
+            <div class="prm">OI 10% + MCB 50% = 60% off</div></div>
+            <div><div class="qt"><span>−</span><b>5</b><span>+</span></div><div class="ql">units</div></div>
+            <div class="ls">$14.00</div><div class="dl">🗑</div></div>
+        </div>
+        <div class="grp">
+          <div class="gh">🚚 <b>KeHE · Bloomington – DC 16</b><span class="chp">Account <b>8675309</b></span><span class="gc">1 product</span></div>
+          <div class="ln"><div class="lt"></div><div class="lm"><div class="lbr">Bianco DiNapoli</div>
+            <div class="lnm">Organic Crushed Puree Tomatoes</div><div class="lpr">WHLSE <b>$40.00</b> / Case</div>
+            <div class="sel"><span class="l">Ships from</span> <b>KeHE · Bloomington – DC 16</b></div>
+            <div class="hint">Also at UNFI · Moreno Valley — move to combine into one order</div></div>
+            <div><div class="qt"><span>−</span><b>1</b><span>+</span></div><div class="ql">cases</div></div>
+            <div class="ls">$40.00</div><div class="dl">🗑</div></div>
+        </div>
+      </div>
+      <div class="aside">
+        <div class="sr"><span>UNFI · Moreno Valley</span><span>$17.60</span></div>
+        <div class="sr"><span>KeHE · Bloomington</span><span>$40.00</span></div>
+        <div class="sr tt"><span>Total</span><span>$57.60</span></div>
+        <div style="font-size:11.5px;color:#2f8f3f;background:#eaf7ec;border-radius:6px;padding:6px 9px;margin-top:9px">You saved $27.94 on promos</div>
+        <div class="info">This is not a purchase. A turnover document is generated for each source and sent to your distributor.</div>
+        <div class="bt pri">Review and Submit</div>
+        <span class="lk">← Continue shopping</span>
+      </div>
+    </div></div>
+  </div>
+
+  <h3>Rules</h3>
+  <ul>
+    <li>Selector renders <b>only where the product is available at 2 or more of the buyer's lit sources</b>. Otherwise static text or nothing</li>
+    <li>Changing a line's DC <b>re-groups immediately</b>, not on Update Cart — otherwise the group header above contradicts the selection beneath it</li>
+    <li>The <b>review step stays read-only</b>. Changing routing on the final screen re-splits POs at the worst moment</li>
+    <li>Account number chip moves to the <b>group header</b>. Beside the Brand chip it reads as though it belongs to the brand</li>
+    <li>The Update Cart row is currently a full-width bordered box containing one right-aligned button and nothing else. With quantity and DC changes applying immediately it may not be needed at all</li>
+  </ul>
+
+  <h3>Add-to-cart DC resolution</h3>
+  <p>One rule, in order:</p>
+  <ol style="max-width:860px">
+    <li>If the buyer already has cart lines at a DC where this product is available, <b>use that DC</b> — consolidate</li>
+    <li>Otherwise use the buyer's <b>primary</b> DC</li>
+    <li>The buyer may change it on the cart line</li>
+  </ol>
+  <div class="box why"><b class="t">Why primary exists</b>
+    Solely as the tiebreaker in step 2. It is not a preference buyers manage — it makes an otherwise arbitrary routing decision <b>predictable and correctable</b>. A single-DC buyer never encounters it.</div>
+
+  <h3>Continuation screens</h3>
+  <p>Every terminal action currently ends in a dead end. A buyer who has just submitted an order is the most likely person in the database to submit another.</p>
+  <table>
+    <tr><th style="width:28%">After</th><th style="width:36%">Primary action</th><th>Secondary</th></tr>
+    <tr><td>Order submitted</td><td>Continue shopping</td><td>View request</td></tr>
+    <tr><td>Sample requested</td><td><b>Inline confirmation — do not navigate</b></td><td></td></tr>
+    <tr><td>Placement requested</td><td><b>Inline confirmation — do not navigate</b></td><td></td></tr>
+    <tr><td>Registration complete</td><td>Start shopping</td><td>Add another DC</td></tr>
+    <tr><td>Empty cart</td><td>Browse products</td><td>New arrivals</td></tr>
+  </table>
+
+  <div class="mock">
+    <div class="cap">Submitted — names both documents and the request number, then offers a way back in.</div>
+    <div class="vp" style="min-width:700px"><div class="emp">
+      <div style="width:46px;height:46px;border-radius:50%;background:#e9f7ec;color:#2f8f3f;display:flex;
+        align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px">✓</div>
+      <h4>Turnover request submitted</h4>
+      <p>Two documents are on their way to your distributors.</p>
+      <div style="display:inline-block;border:1px solid var(--line);border-radius:9px;padding:12px 18px;
+        text-align:left;margin-bottom:14px;min-width:320px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;gap:24px;margin-bottom:5px"><span>Request</span><b>#TP-10428</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;gap:24px;margin-bottom:5px"><span>UNFI · Moreno Valley</span><b>$17.60 · 2 products</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;gap:24px"><span>KeHE · Bloomington – DC 16</span><b>$40.00 · 1 product</b></div>
+      </div><br>
+      <span class="bt o" style="display:inline-flex;width:auto;padding:0 22px;margin-right:8px">Continue shopping</span>
+      <span class="bt gh" style="display:inline-flex;width:auto;padding:0 22px">View request</span>
+    </div></div>
+  </div>
+</section>
+
+<!-- ============ 12 RAIL ============ -->
+<section id="rail">
+  <h2><span class="num">§12</span>Category rail</h2>
+  <p class="slede">Removed from the staging template — a query for <code>[class*="filter"]</code> returns <b>zero elements</b>. It exists and works on production as <code>aside.tp-filter-card</code>.</p>
+
+  <div class="box stop"><b class="t">This contradicts a written spec</b>
+    The navigation spec removed the <b>DC checkbox tree</b> but explicitly kept <i>Shop by Category, Shop by Brands, the Brands filter and search</i>. The DC tree was correctly removed; the category sidebar was not.</div>
+
+  <div class="mock">
+    <div class="cap">Two filters applied — <b>the buyer can see why the grid is short</b>. This is why there is no toggle.</div>
+    <div class="vp"><div class="wrap">
+      <div class="rail">
+        <h5>Categories</h5>
+        <div class="opt"><i class="bx"></i>Body Care<span class="cnt">14</span></div>
+        <div class="opt"><i class="bx on"></i><b>Breakfast</b><span class="cnt">9</span></div>
+        <div class="opt"><i class="bx on"></i><b>Cereal</b><span class="cnt">6</span></div>
+        <div class="opt"><i class="bx"></i>Cleaning<span class="cnt">4</span></div>
+        <div class="opt"><i class="bx"></i>Dairy<span class="cnt">11</span></div>
+        <h5 class="two">Brands</h5>
+        <div class="opt"><i class="bx"></i>Bianco DiNapoli<span class="cnt">6</span></div>
+        <div class="opt"><i class="bx"></i>Buddha Tea<span class="cnt">12</span></div>
+      </div>
+      <div class="g3">
+        <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Nature's Path</div>
+          <div class="pn">Coconut Crunch Cereal</div><div class="pr">WHLSE <b>$44.00</b> <em>/ Case</em></div>
+          <div class="reqs"><a>Request Sample</a></div><div class="qa">+ Add</div></div>
+        <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Nature's Path</div>
+          <div class="pn">Coconut Crunch 7oz</div><div class="pr">WHLSE <b>$36.00</b> <em>/ Case</em></div>
+          <div class="reqs"></div><div class="qa">+ Add</div></div>
+        <div class="cd"><div class="bm">🔖</div><div class="th">product</div><div class="br">Nature's Path</div>
+          <div class="pn">Cinnamon Coconut Crunch</div><div class="pr">WHLSE <b>$36.00</b> <em>/ Case</em></div>
+          <div class="reqs"><a>Request Placement</a></div><div class="qa">+ Add</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <ul>
+    <li><b>Restore</b> <code>aside.tp-filter-card</code> to the catalog page</li>
+    <li><b>Always open above 1024px. Remove the show/hide toggle</b> — a collapsed rail hides which filters are applied, the same failure that made the DC dropdown unusable</li>
+    <li>Below 1024px it becomes a <b>drawer</b> with a filter count on the button. That is the one place a toggle is correct</li>
+    <li>Replace the hardcoded <code>top: 170px</code> with the measured header height variable from §4, and <b>move the offset when the header retracts</b> — otherwise the rail floats with a gap above it on scroll-down</li>
+    <li>Filter selections <b>persist across navigation within a session</b>. Filtering, opening a product and going back must not clear them</li>
+    <li>Product counts beside each entry set expectations before the click — worth more when assortment is thin</li>
+  </ul>
+</section>
+
+<!-- ============ 13 STATES ============ -->
+<section id="states">
+  <h2><span class="num">§13</span>Empty and thin catalog states</h2>
+  <p class="slede">The catalog is scoped to what is active at the buyer's DC. Early on, some DCs carry very few products. <b>These are not edge cases — they are the launch condition</b> for part of the buyer base.</p>
+
+  <div class="mock">
+    <div class="cap">Left: all sources off. Right: nothing active at the buyer's DC — First Mile is the one honest offer.</div>
+    <div class="vp" style="display:flex;min-width:900px">
+      <div style="flex:1">
+        <div class="b2" style="border-top:0">
+          <span class="pl">Shopping from</span>
+          <span class="pill off"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· DC 16</span></span>
+          <span class="pill off"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+          <span class="pill add">+ Add DC</span></div>
+        <div class="emp"><h4>All sources are off</h4><p>Turn one on to see products.</p>
+          <span class="bt o">Turn all sources on</span></div>
+      </div>
+      <div style="flex:1;border-left:1px solid var(--line)">
+        <div class="b2" style="border-top:0">
+          <span class="pl">Shopping from</span>
+          <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Elkton – DC 27</span></span>
+          <span class="pill act"><i class="hl"></i><span class="ds" style="color:var(--violet)">First Mile</span><span style="font-weight:700">· Apply</span></span></div>
+        <div class="emp"><h4>Nothing at KeHE Elkton – DC 27 yet</h4>
+          <p>First Mile ships by the case from anywhere — see what's available.</p>
+          <span class="bt o">Browse First Mile</span></div>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <tr><th style="width:30%">State</th><th>Behaviour</th></tr>
+    <tr><td>All pills off</td><td>Message plus recovery, not a blank grid: <i>"All sources are off. Turn one on to see products,"</i> with a control that lights them</td></tr>
+    <tr><td>Nothing at their DC</td><td><b>Do not show "New items coming soon" on an empty grid.</b> A buyer who has just handed over an account number and received a promise does not return. Show First Mile — it is not DC-scoped, so it is the only thing offerable honestly in this state</td></tr>
+    <tr><td>One or two products</td><td><b>Worse than empty.</b> Zero reads as "not launched yet"; a single card reads as "this is the entire catalog", and a buyer who concludes that does not come back to check whether it grew. Handled by send targeting rather than code — but the state must still render sensibly for buyers arriving by forwarded link</td></tr>
+  </table>
+</section>
+
+<!-- ============ 14 DROPPED ============ -->
+<section id="dropped">
+  <h2><span class="num">§14</span>Dropped from scope</h2>
+  <table>
+    <tr><th style="width:24%">Feature</th><th>Reason</th></tr>
+    <tr><td><b>Discovery</b></td><td>Removed. Products not available to a buyer are <b>not shown at all</b>. First Mile is the single named exception (§6)</td></tr>
+    <tr><td><b>Pre-commit</b></td><td>Removed. Aggregated conditional demand per brand × DC needs buyer density to be meaningful; at launch volumes it is a rounding error. Revisit when density exists</td></tr>
+    <tr><td>Discovery lens (<code>.disclens</code>)</td><td>Never built, now out of scope with Discovery</td></tr>
+  </table>
+  <p><b>Retained:</b> Request Sample, Request Placement and the bookmark. They work at any scale and need no threshold.</p>
+</section>
+
+<!-- ============ 15 TESTING ============ -->
+<section id="testing">
+  <h2><span class="num">§15</span>Testing</h2>
+  <div class="box stop"><b class="t">Do not verify the header by eye on a single screen</b>
+    The logo defect is invisible above 1190px and invisible below 1024px. It only appears in the band between.</div>
+  <ul>
+    <li>Test explicitly at <b>1030, 1100, 1150, 1190 and 1440</b> CSS px using device emulation</li>
+    <li><b>Confirm browser zoom is at 100% when measuring.</b> Zoom multiplies with OS display scaling and will silently shift the viewport width being tested</li>
+    <li>Test pills with a buyer holding three or more DCs, including one Palko <b>Warehouse</b> and one Palko <b>First Mile</b> row on the same account number</li>
+    <li>Test the empty-catalog and all-pills-off states directly — they will occur in production</li>
+    <li>Test a mixed cart containing both a case-priced and a unit-priced line</li>
+  </ul>
+</section>
+
+</div>
+</div>
+</body>
+</html>

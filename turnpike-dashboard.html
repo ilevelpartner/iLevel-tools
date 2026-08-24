@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Turnpike — Build Dashboard</title>
+<style>
+:root {
+  --o:#e8611a; --amber:#dda032; --ink:#23252b; --muted:#6c7079; --line:#e3e5ea;
+  --soft:#fff4ed; --soft-line:#f6c9ac; --on:#3fa34d; --grey-line:#d7dae0;
+  --field:#f2f3f6; --violet:#5b3fa8; --violet-bg:#f3f0fb; --violet-line:#e2dbf3;
+  --err:#c0392b; --err-bg:#fdf2f0; --err-line:#f2cdc6;
+  --ok-bg:#eef8f0; --ok-line:#c9e6cf; --ok-ink:#2f7d3f;
+  --bg:#f1f2f5; --card:#fff; --sidebar:#1a1a2e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font:15px/1.6 "Segoe UI",Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+
+/* ── Shell ── */
+.shell{display:flex;min-height:100vh}
+.side{width:260px;flex:0 0 260px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  background:var(--sidebar);padding:28px 0 60px;z-index:10}
+.side::-webkit-scrollbar{width:4px}
+.side::-webkit-scrollbar-thumb{background:#3a3a5c;border-radius:4px}
+
+.side .logo{padding:0 24px 20px;border-bottom:1px solid #2c2c48;margin-bottom:16px}
+.side .logo b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(92deg,#f5a020,#e8551f);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.side .logo span{display:block;color:#6e7192;font-size:11px;letter-spacing:.04em;margin-top:4px}
+
+.side .release{color:#6e7192;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:18px 24px 6px;pointer-events:none}
+.side a{display:block;padding:7px 24px;color:#b9bcd0;text-decoration:none;font-size:13.5px;
+  border-left:3px solid transparent;transition:all .15s}
+.side a:hover{color:#fff;background:#23233c}
+.side a.active{color:#ffb37a;border-left-color:#ffb37a;background:#23233c}
+.side a .tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:4px;
+  margin-left:6px;vertical-align:middle;font-weight:700;letter-spacing:.04em}
+.side a .tag.r1{background:#c0392b;color:#fff}
+.side a .tag.r2{background:var(--o);color:#fff}
+.side a .tag.r3{background:var(--amber);color:#fff}
+
+.main{flex:1;min-width:0;padding-bottom:120px}
+
+/* ── Top bar ── */
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:30px 44px 24px;position:sticky;top:0;z-index:5}
+.topbar h1{font-size:26px;letter-spacing:-.02em;margin-bottom:4px}
+.topbar p{color:var(--muted);font-size:14px;max-width:780px}
+.meta-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.meta-row .chip{font-size:11px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.meta-row .chip b{color:var(--ink)}
+
+/* ── Release banner ── */
+.release-banner{margin:28px 44px 0;padding:14px 18px;border-radius:10px;font-size:13px;font-weight:600}
+.release-banner.r1{background:var(--err-bg);border:1px solid var(--err-line);color:var(--err)}
+.release-banner.r2{background:var(--soft);border:1px solid var(--soft-line);color:var(--o)}
+.release-banner.r3{background:#fef9ed;border:1px solid #f0dba8;color:#9a7b2a}
+.release-banner span{font-weight:400;color:var(--muted);margin-left:8px}
+
+/* ── Project cards ── */
+.projects{padding:0 44px}
+.project{margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.project .proj-head{padding:26px 28px 20px;cursor:pointer;user-select:none;display:flex;align-items:flex-start;gap:16px}
+.project .proj-head:hover{background:#fafbfc}
+.proj-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.proj-label.header{color:var(--o)}
+.proj-label.sources{color:var(--violet)}
+.proj-label.flows{color:var(--amber)}
+.proj-label.edges{color:var(--err)}
+.proj-num{font-size:38px;font-weight:800;color:#e0e2e7;line-height:1;flex:0 0 48px;text-align:right}
+.proj-info{flex:1;min-width:0}
+.proj-info h2{font-size:20px;letter-spacing:-.01em;margin-bottom:4px}
+.proj-info p{color:var(--muted);font-size:13.5px;max-width:680px}
+.proj-toggle{flex:0 0 auto;margin-top:6px;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);
+  transition:all .2s;background:#fff}
+.project.open .proj-toggle{background:var(--o);color:#fff;border-color:var(--o);transform:rotate(180deg)}
+.proj-body{display:none;border-top:1px solid var(--line);padding:24px 28px 28px}
+.project.open .proj-body{display:block}
+
+/* ── Mockup frames ── */
+.mock{background:#e9ebef;border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0;overflow-x:auto}
+.mock-cap{font-size:11.5px;color:#767b85;margin-bottom:10px}
+.mock-cap b{color:var(--ink)}
+.vp{background:#fff;border-radius:7px;overflow:hidden;box-shadow:0 1px 3px rgba(20,20,40,.09);min-width:860px}
+
+/* ── App chrome ── */
+.hdr-mock{border-bottom:3px solid #f0a33c}
+.b1{display:flex;align-items:center;gap:17px;padding:0 20px;height:56px}
+.lg{flex:0 0 148px;font-size:24px;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(92deg,#f5a020,#e8551f);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nv{display:flex;align-items:center;gap:18px;font-size:13.5px}
+.nv a{text-decoration:none;color:var(--ink);white-space:nowrap;cursor:default}
+.nv a.hot{color:var(--o);font-weight:600}
+.nv a.cur{background:#fdf3e9;color:var(--o);padding:5px 11px;border-radius:6px}
+.ac{margin-left:auto;display:flex;align-items:center;gap:9px}
+.ic{width:31px;height:31px;border-radius:50%;border:1px solid var(--line);display:flex;
+  align-items:center;justify-content:center;font-size:12px;color:#575c65}
+.cb2{border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:12.5px}
+.av{width:32px;height:32px;border-radius:50%;background:var(--o);color:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:11.5px;font-weight:700}
+
+/* ── Pills ── */
+.b2{display:flex;align-items:center;gap:8px;padding:8px 20px 9px;border-top:1px solid var(--line);flex-wrap:wrap}
+.pl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:7px;height:29px;padding:0 12px;border-radius:999px;
+  font-size:12.5px;border:1px solid var(--soft-line);background:var(--soft);white-space:nowrap;cursor:pointer;transition:all .2s}
+.dt{width:8px;height:8px;border-radius:50%;background:var(--on)}
+.ds{font-weight:700;color:var(--o)}
+.dc{color:var(--muted)}
+.pill.off{background:#f4f5f7;border-color:var(--grey-line);opacity:.75}
+.pill.off .dt{background:transparent;box-shadow:inset 0 0 0 1.5px #b3b8c0}
+.pill.off .ds{color:var(--muted)}
+.pill.fm{background:var(--violet-bg);border-color:var(--violet-line)}
+.pill.fm .dt{background:#6b4fbb}
+.pill.fm .ds{color:var(--violet)}
+.pill.act{background:transparent;border:1px dashed var(--grey-line);color:var(--muted);cursor:pointer}
+.pill.add{background:transparent;border:1px dashed var(--grey-line);color:var(--muted);font-weight:600;cursor:pointer}
+
+/* ── Product cards ── */
+.card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;padding:15px 20px 20px}
+.cd{border:1px solid var(--line);border-radius:9px;padding:11px;position:relative}
+.cd .thumb{height:92px;border-radius:6px;background:#f5f6f8;display:flex;align-items:center;justify-content:center;
+  color:#c7cad0;font-size:10.5px;margin-bottom:9px}
+.cd .bm{position:absolute;top:8px;right:8px;width:21px;height:21px;border-radius:50%;border:1px solid var(--soft-line);
+  color:var(--o);font-size:10px;display:flex;align-items:center;justify-content:center;background:#fff}
+.cd .br{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.cd .pn{font-size:12.5px;font-weight:600;color:var(--o);line-height:1.3;margin:2px 0 6px}
+.cd .pr{font-size:12.5px;margin-bottom:7px}
+.cd .pr s{color:#b6b9c0;margin-right:4px}
+.cd .pr b{font-size:16px;color:var(--o)}
+.cd .pr em{font-style:normal;color:var(--muted);font-size:11.5px}
+.cd .reqs{display:flex;gap:12px;font-size:11px;margin-bottom:9px;min-height:15px}
+.cd .reqs a{color:var(--o);text-decoration:none;font-weight:600;cursor:pointer}
+.cd .qa{height:32px;border-radius:6px;background:var(--o);color:#fff;font-size:12.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.cd .qa:hover{background:#d4550f}
+.cd.fm-card .thumb{background:#f7f5fb}
+.cd .gate{font-size:11px;color:var(--violet);background:var(--violet-bg);border:1px solid var(--violet-line);
+  border-radius:6px;padding:7px 8px;margin-bottom:8px;line-height:1.35}
+.cd .ab{height:32px;border-radius:6px;background:#fff;color:var(--violet);border:1px solid #cfc3ea;
+  font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+/* ── Cart ── */
+.cart-wrap{display:flex;gap:16px;padding:15px 20px 20px;align-items:flex-start}
+.cart-main{flex:1;min-width:0}
+.cart-group{border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:12px}
+.cart-gh{display:flex;align-items:center;gap:9px;padding:9px 13px;background:#fafbfc;border-bottom:1px solid var(--line)}
+.cart-gh b{font-size:13px}
+.cart-chip{font-size:10.5px;background:#fff;border:1px solid var(--line);border-radius:5px;padding:2px 7px;color:var(--muted)}
+.cart-chip b{color:var(--ink);font-size:10.5px}
+.cart-gc{margin-left:auto;font-size:11px;color:var(--muted);background:#eef1f5;border-radius:5px;padding:2px 8px}
+.cart-line{display:flex;gap:12px;padding:12px 13px;border-bottom:1px solid #f1f2f5;align-items:flex-start}
+.cart-line:last-child{border-bottom:0}
+.cart-lt{width:48px;height:48px;border-radius:5px;background:#f5f6f8;flex:0 0 auto}
+.cart-lm{flex:1;min-width:0}
+.cart-lbr{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+.cart-lnm{font-size:13px;font-weight:600;margin-bottom:3px}
+.cart-lpr{font-size:12.5px}
+.cart-lpr s{color:#b6b9c0;margin-right:4px}
+.cart-lpr b{color:var(--o)}
+.cart-prm{font-size:10.5px;color:var(--violet);background:var(--violet-bg);border-radius:5px;padding:2px 7px;
+  display:inline-block;margin-top:5px}
+.cart-qt{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:0 0 auto}
+.cart-qt span{width:26px;height:29px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer}
+.cart-qt b{width:32px;text-align:center;font-size:13px}
+.cart-ql{font-size:10.5px;color:var(--muted);text-align:center;margin-top:2px}
+.cart-ls{width:72px;text-align:right;font-size:13.5px;font-weight:600;flex:0 0 auto}
+.cart-dl{width:29px;height:29px;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;
+  justify-content:center;color:#9aa0a8;font-size:12px;flex:0 0 auto;cursor:pointer}
+.cart-sel{margin-top:6px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--grey-line);
+  border-radius:6px;padding:4px 9px;font-size:11.5px;background:#fff}
+.cart-sel::after{content:"⌄";color:var(--muted)}
+.cart-hint{font-size:11px;color:var(--o);margin-top:5px}
+.cart-aside{width:250px;flex:0 0 250px;border:1px solid var(--line);border-radius:9px;padding:14px 15px}
+.cart-sr{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0}
+.cart-sr.tt{font-size:16px;font-weight:700;border-top:1px solid var(--line);margin-top:7px;padding-top:10px}
+.cart-info{background:#eef4fd;border:1px solid #cfe0f7;border-radius:7px;padding:9px 11px;font-size:11.5px;
+  color:#2a5b9a;line-height:1.45;margin:12px 0}
+.cart-btn{height:38px;border-radius:999px;font-size:13.5px;font-weight:600;display:flex;align-items:center;
+  justify-content:center;width:100%;background:var(--amber);color:#fff;cursor:pointer}
+.cart-lk{display:block;text-align:center;font-size:12px;color:var(--o);margin-top:10px;font-weight:600}
+
+/* ── Rail ── */
+.rail-wrap{display:flex;gap:16px;padding:15px 20px 20px;align-items:flex-start}
+.rail-side{width:230px;flex:0 0 230px;border:1px solid var(--line);border-radius:9px;padding:13px 14px}
+.rail-side h5{margin:0 0 8px;font-size:12px;font-weight:700}
+.rail-side h5.two{margin-top:14px}
+.rail-opt{display:flex;align-items:center;gap:8px;font-size:12px;padding:3px 0;color:#3a3d45}
+.bx{width:12px;height:12px;border-radius:3px;border:1.5px solid #c3c7cf;flex:0 0 auto}
+.bx.on{background:var(--o);border-color:var(--o);position:relative}
+.bx.on::after{content:"✓";color:#fff;font-size:8px;position:absolute;left:2px;top:-2px}
+.cnt{margin-left:auto;color:#aeb2ba;font-size:10.5px}
+.rail-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+/* ── Empty states ── */
+.emp{padding:36px 20px 12px;text-align:center}
+.emp h4{margin:0 0 5px;font-size:16px;color:var(--ink)}
+.emp p{margin:0 auto 14px;font-size:13px;color:var(--muted)}
+.emp .btn-o{display:inline-flex;height:38px;padding:0 22px;border-radius:999px;background:var(--o);color:#fff;
+  font-size:13px;font-weight:600;align-items:center;cursor:pointer}
+
+/* ── Toast ── */
+.tst{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 22px rgba(25,25,50,.13);
+  padding:12px 15px;display:flex;gap:10px;align-items:flex-start;width:420px;margin:14px 20px}
+.tk{width:24px;height:24px;border-radius:50%;background:#e9f7ec;color:#2f8f3f;display:flex;
+  align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
+.tmn{font-size:13px;font-weight:600;margin-bottom:3px}
+.tsh{font-size:12px;color:var(--muted);white-space:nowrap}
+.tsh b{color:var(--ink);font-weight:600}
+.tlk{font-size:12px;color:var(--o);font-weight:600;margin-top:7px;display:inline-block}
+
+/* ── Spec content ── */
+.spec-table{border-collapse:collapse;width:100%;max-width:860px;margin:12px 0;font-size:13px}
+.spec-table th{background:var(--sidebar);color:#fff;text-align:left;padding:8px 12px;font-size:11px;font-weight:600;letter-spacing:.03em}
+.spec-table td{padding:8px 12px;border-bottom:1px solid #ebedf1;vertical-align:top}
+.spec-table tbody tr:nth-child(even) td{background:#fafbfc}
+.spec-table code{font:12px/1.5 Consolas,"SF Mono",monospace;background:#f1f2f5;border-radius:3px;padding:1px 5px}
+
+.callout{border-radius:9px;padding:13px 16px;margin:14px 0;font-size:13.5px;max-width:860px}
+.callout b.t{display:block;font-size:10px;letter-spacing:.09em;text-transform:uppercase;margin-bottom:4px}
+.callout.stop{background:var(--err-bg);border:1px solid var(--err-line)}
+.callout.stop b.t{color:var(--err)}
+.callout.why{background:#f5f6fa;border:1px solid #dfe2ea}
+.callout.why b.t{color:#5a6070}
+.callout.ok{background:var(--ok-bg);border:1px solid var(--ok-line)}
+.callout.ok b.t{color:var(--ok-ink)}
+
+.spec-list{margin:10px 0;padding-left:20px;max-width:860px;font-size:13.5px}
+.spec-list li{margin-bottom:5px}
+
+.acceptance{background:#fff;border:1px solid var(--line);border-radius:9px;padding:14px 18px;max-width:860px;margin:14px 0}
+.acceptance h4{margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.acceptance ul{list-style:none;padding:0;margin:0}
+.acceptance li{padding:4px 0 4px 26px;position:relative;font-size:13px}
+.acceptance li::before{content:"";position:absolute;left:0;top:7px;width:14px;height:14px;
+  border:1.5px solid #c3c7cf;border-radius:3px}
+
+/* ── Panel mockup ── */
+.stage{padding:18px;background:#f7f8fa;display:flex;justify-content:center}
+.pnl{width:430px;background:#fff;border:1px solid var(--line);border-radius:11px;
+  box-shadow:0 10px 28px rgba(25,25,50,.13);overflow:hidden}
+.pnl-h{padding:17px 20px 0}
+.pnl-h h4{margin:0;font-size:17px;font-weight:600;color:var(--ink)}
+.pnl-h p{margin:5px 0 0;font-size:12px;color:var(--muted)}
+.pnl-body{padding:15px 20px 4px}
+.pnl-row{margin-bottom:11px}
+.pnl-row label{display:block;font-size:11.5px;font-weight:600;margin-bottom:4px}
+.pnl-row .rq{color:var(--err);font-weight:400}
+.pnl-fd{height:37px;border-radius:7px;background:var(--field);border:1px solid transparent;display:flex;
+  align-items:center;padding:0 12px;font-size:13.5px}
+.pnl-fd.ok{background:#fff;border-color:var(--grey-line)}
+.pnl-fd.sl::after{content:"⌄";margin-left:auto;color:var(--muted)}
+.pnl-fd .eye{margin-left:auto;color:#8d929b;font-size:13px}
+.pnl-tw{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.pnl-foot{padding:13px 20px 18px;display:flex;gap:9px}
+.pnl-btn{height:36px;border-radius:8px;padding:0 18px;font-size:13px;font-weight:600;display:inline-flex;
+  align-items:center;justify-content:center;cursor:pointer}
+.pnl-btn.pri{background:var(--amber);color:#fff}
+.pnl-btn.gh{background:var(--field);color:var(--ink)}
+.pnl-btn.rt{margin-left:auto}
+
+/* ── Utility ── */
+.section-label{font-size:13px;color:var(--muted);margin:18px 0 8px;font-weight:600}
+.flex-split{display:flex;min-width:860px}
+.flex-split > div{flex:1}
+.flex-split > div + div{border-left:1px solid var(--line)}
+
+@media(max-width:1100px){
+  .side{display:none}
+  .card-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media print{.side{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ─── SIDEBAR ─── -->
+<nav class="side">
+  <div class="logo">
+    <b>Turnpike</b>
+    <span>BUILD DASHBOARD · v2 · 24 AUG 2026</span>
+  </div>
+
+  <div class="release">Release 1 — Ship now</div>
+  <a href="#p1" onclick="openProject('p1')">§1 Logo crush <span class="tag r1">NOW</span></a>
+  <a href="#p3" onclick="openProject('p3')">§3 Nav changes</a>
+  <a href="#p10" onclick="openProject('p10')">§10 PDP layout</a>
+  <a href="#p11c" onclick="openProject('p11c')">§11 Continuation screens</a>
+
+  <div class="release">Release 2 — Core</div>
+  <a href="#p2" onclick="openProject('p2')">§2 Two bands</a>
+  <a href="#p4" onclick="openProject('p4')">§4 Retracting header</a>
+  <a href="#p5" onclick="openProject('p5')">§5 DC pills</a>
+  <a href="#p6" onclick="openProject('p6')">§6 First Mile</a>
+  <a href="#p7" onclick="openProject('p7')">§7 Add DC panel</a>
+  <a href="#p9" onclick="openProject('p9')">§9 Product cards</a>
+
+  <div class="release">Release 3 — Follows</div>
+  <a href="#p8" onclick="openProject('p8')">§8 Registration</a>
+  <a href="#p11" onclick="openProject('p11')">§11 Cart &amp; submit</a>
+  <a href="#p12" onclick="openProject('p12')">§12 Category rail</a>
+  <a href="#p13" onclick="openProject('p13')">§13 Empty &amp; thin states</a>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<div class="main">
+
+<div class="topbar">
+  <h1>Turnpike — Buyer Experience Build Spec</h1>
+  <p>Replaces the buyer-facing catalog and header. Each project below includes the mockup, the spec, and acceptance criteria.</p>
+  <div class="meta-row">
+    <span class="chip"><b>To</b> Harsh / Kulin — Pennine Technolabs</span>
+    <span class="chip"><b>From</b> David Abrahams — iLevel Group LLC</span>
+    <span class="chip"><b>Env</b> shopturnpikstg.wpenginepowered.com</span>
+  </div>
+</div>
+
+<!-- ═══════════ RELEASE 1 ═══════════ -->
+<div class="release-banner r1">Release 1 — Ship now <span>No dependencies. Fix and deploy independently.</span></div>
+
+<!-- §1 Logo crush -->
+<div class="projects" id="p1">
+<div class="project open">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">1</div>
+    <div class="proj-info">
+      <div class="proj-label header">HEADER · BUG</div>
+      <h2>Logo crush — ship immediately</h2>
+      <p>The logo renders at 18 × 5px at a 1033px viewport. The fix is one CSS declaration.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="callout stop"><b class="t">Cause</b>
+      <code>.site-header .header-top</code> is <code>display:flex</code> with four children. Three cannot shrink, so <code>.header-logo</code> absorbs 100% of the overflow.</div>
+
+    <table class="spec-table">
+      <tr><th>Viewport</th><th>Logo width</th><th>State</th></tr>
+      <tr><td>≥ 1192px</td><td>150px</td><td>Correct</td></tr>
+      <tr><td>1141px</td><td>105px</td><td>Degraded</td></tr>
+      <tr><td>1033px</td><td><b style="color:var(--err)">18px</b></td><td><b style="color:var(--err)">Destroyed</b></td></tr>
+      <tr><td>≤ 1024px</td><td>150px</td><td>Correct — hamburger releases pressure</td></tr>
+    </table>
+
+    <div class="section-label">Fix</div>
+    <pre style="font:13px/1.6 Consolas,monospace;background:#1e1e30;color:#dfe3f0;padding:13px 16px;border-radius:8px;max-width:600px"><span style="color:#7e83a8">/* the only change needed */</span>
+.site-header .header-top .header-logo { <span style="color:#ffb37a">flex</span>: 0 0 150px; }</pre>
+
+    <div class="acceptance"><h4>Acceptance</h4><ul>
+      <li>Logo renders at 150px at 1030, 1100, 1150, 1190 and 1440</li>
+      <li>No horizontal scrollbar between 1024 and 1440</li>
+    </ul></div>
+  </div>
+</div>
+</div>
+
+<!-- §3 Nav changes -->
+<div class="projects" id="p3">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">3</div>
+    <div class="proj-info">
+      <div class="proj-label header">HEADER</div>
+      <h2>Nav changes</h2>
+      <p>Rename Home → Shop. Remove Manage DCs entirely — pills replace it. Result: six items, down from seven.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <ul class="spec-list">
+      <li><b>Rename Home → Shop.</b> Confirm it resolves to the catalog.</li>
+      <li><b>Remove Manage DCs entirely.</b> Pills replace viewing and toggling; the Add DC pill replaces adding.</li>
+    </ul>
+    <p style="font-size:13.5px;margin:12px 0">Result: <code style="font:12px Consolas,monospace;background:#f1f2f5;border-radius:3px;padding:1px 5px">Shop · New Arrivals · Sale · Brands · Categories · Support</code></p>
+    <div class="callout stop"><b class="t">Currently inconsistent</b>
+      Nav differs by template. <code style="font:12px Consolas,monospace">Categories</code> appears on shop pages but not on cart, checkout, or the registration thank-you. It must be identical on every template.</div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ RELEASE 2 ═══════════ -->
+<div class="release-banner r2">Release 2 — Core <span>Header + pills + sources + cards. Ship together.</span></div>
+
+<!-- §2 Two bands -->
+<div class="projects" id="p2">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">2</div>
+    <div class="proj-info">
+      <div class="proj-label header">HEADER</div>
+      <h2>Two bands</h2>
+      <p>Logo and nav on one line. DC pills get their own band. Total height ~104px — shorter than today despite gaining a row.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="mock">
+      <div class="mock-cap">Target header at <b>1180px</b> — total height <b>~104px</b></div>
+      <div class="vp">
+        <div class="hdr-mock">
+          <div class="b1"><div class="lg">Turnpike</div>
+            <nav class="nv"><a class="cur">Shop</a><a class="hot">New Arrivals</a><a class="hot">Sale</a><a>Brands</a><a>Categories ⌄</a><a>Support</a></nav>
+            <div class="ac"><div class="ic">⌕</div><div class="ic">🔖</div><div class="cb2">🛍 (0)</div><div class="av">FL</div></div>
+          </div>
+          <div class="b2"><span class="pl">Shopping from</span>
+            <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+            <span class="pill act"><i style="width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #b3b8c0"></i><span class="ds" style="color:var(--violet)">First Mile</span><span style="font-weight:700">· Apply</span></span>
+            <span class="pill add">+ Add DC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <tr><th>Band</th><th>Contents</th><th>Behaviour</th></tr>
+      <tr><td><b>1</b> ~58px</td><td>logo · nav · search · saved · cart · account</td><td>logo <code style="font:12px Consolas,monospace">flex: 0 0 150px</code>, nav left-aligned, actions right</td></tr>
+      <tr><td><b>2</b> ~46px</td><td>DC pills (§5)</td><td><code style="font:12px Consolas,monospace">flex-wrap</code> — wraps, never hidden</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- §5 DC pills -->
+<div class="projects" id="p5">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">5</div>
+    <div class="proj-info">
+      <div class="proj-label sources">SOURCES</div>
+      <h2>DC pills</h2>
+      <p>Band 2. Every source the buyer holds, plus an Add DC pill. Replaces the Manage DCs dropdown. State is visible without interaction.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="callout why"><b class="t">Why pills, not a dropdown</b>
+      The dropdown made active state invisible — a buyer could not tell at a glance which DCs were live without opening a menu. Pills make state readable <b>without interaction</b>.</div>
+
+    <div class="mock">
+      <div class="mock-cap">Four states: <b>new buyer</b> · <b>established + Palko</b> · <b>one off</b> · <b>all off</b></div>
+      <div class="vp">
+        <div class="b2" style="border-top:0"><span class="pl">Shopping from</span>
+          <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+          <span class="pill act"><i style="width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #b3b8c0"></i><span class="ds" style="color:var(--violet)">First Mile</span><span style="font-weight:700">· Apply</span></span>
+          <span class="pill add">+ Add DC</span></div>
+        <div class="b2"><span class="pl">Shopping from</span>
+          <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+          <span class="pill"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+          <span class="pill"><i class="dt"></i><span class="ds">Palko</span><span class="dc">· Warehouse</span></span>
+          <span class="pill fm"><i class="dt"></i><span class="ds">First Mile</span></span>
+          <span class="pill add">+ Add DC</span></div>
+        <div class="b2"><span class="pl">Shopping from</span>
+          <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+          <span class="pill off"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+          <span class="pill fm"><i class="dt"></i><span class="ds">First Mile</span></span>
+          <span class="pill add">+ Add DC</span>
+          <span style="font-size:11px;color:var(--muted);margin-left:5px">Hidden from view. Your cart and account are unchanged.</span></div>
+        <div class="b2"><span class="pl">Shopping from</span>
+          <span class="pill off"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+          <span class="pill off"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+          <span class="pill off"><i class="dt"></i><span class="ds">First Mile</span></span>
+          <span class="pill add">+ Add DC</span></div>
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <tr><th>State</th><th>Appearance</th><th>Tap</th></tr>
+      <tr><td>On</td><td>Cream fill, orange distributor, green dot</td><td>Toggles off</td></tr>
+      <tr><td>Off</td><td>Grey fill, hollow dot, muted text</td><td>Toggles on</td></tr>
+    </table>
+
+    <ul class="spec-list">
+      <li><b>No floor.</b> All pills may be toggled off → empty grid with recovery (§13)</li>
+      <li>Toggle is a <b>view filter on catalog query only</b>. Cart lines are untouched.</li>
+      <li>Toggle state is <b>per-session, non-durable</b>. All pills lit on every new login.</li>
+    </ul>
+
+    <div class="acceptance"><h4>Acceptance</h4><ul>
+      <li>New buyer sees exactly one lit pill plus Add DC immediately after registration</li>
+      <li>Toggling a pill off removes that source's products and leaves the cart unchanged</li>
+      <li>All pills off produces recovery state, not an error or blank page</li>
+      <li>All held pills lit again at next login</li>
+      <li>One Palko account number added as both Warehouse and First Mile produces two independently toggleable pills</li>
+    </ul></div>
+  </div>
+</div>
+</div>
+
+<!-- §6 First Mile -->
+<div class="projects" id="p6">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">6</div>
+    <div class="proj-info">
+      <div class="proj-label sources">SOURCES</div>
+      <h2>First Mile</h2>
+      <p>Palko drop-ship — ordered by the case, freight on the brand, not DC-scoped. Preview toggle defaults off for unapplied buyers.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <table class="spec-table">
+      <tr><th>Buyer</th><th>Pill</th><th>First Mile products</th></tr>
+      <tr><td>Has Palko account</td><td>Lit, violet</td><td>Orderable, priced normally</td></tr>
+      <tr><td>No Palko account</td><td>Dashed — <code style="font:12px Consolas,monospace">First Mile · Apply</code></td><td>Hidden until preview toggled on; then visible, unpriced</td></tr>
+      <tr><td>Applied, pending</td><td>Dashed — <code style="font:12px Consolas,monospace">First Mile · Pending</code></td><td>Same as above</td></tr>
+    </table>
+
+    <div class="mock">
+      <div class="mock-cap">Preview <b>on</b>, unapplied buyer — First Mile cards render everything except price.</div>
+      <div class="vp">
+        <div class="b2" style="border-top:0"><span class="pl">Shopping from</span>
+          <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Bloomington – DC 16</span></span>
+          <span class="pill fm"><i class="dt"></i><span class="ds">First Mile</span><span class="dc">· preview</span></span>
+          <span class="pill add">+ Add DC</span></div>
+        <div class="card-grid">
+          <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Buddha Tea</div>
+            <div class="pn">4th Chakra Tea</div><div class="pr">SRP <s>$8.99</s> <b>$3.60</b> <em>/ Unit</em></div>
+            <div class="reqs"><a>Request Sample</a><a>Request Placement</a></div><div class="qa">+ Add</div></div>
+          <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Bianco DiNapoli</div>
+            <div class="pn">Organic Crushed Puree</div><div class="pr">WHLSE <b>$40.00</b> <em>/ Case</em></div>
+            <div class="reqs"><a>Request Sample</a></div><div class="qa">+ Add</div></div>
+          <div class="cd fm-card"><div class="bm">🔖</div><div class="thumb">first mile</div><div class="br">Alaffia</div>
+            <div class="pn">Everyday Shea Lotion</div>
+            <div class="gate">Pricing available once your Palko account is approved.</div><div class="ab">Apply for Palko</div></div>
+          <div class="cd fm-card"><div class="bm">🔖</div><div class="thumb">first mile</div><div class="br">Blendtopia</div>
+            <div class="pn">Detox Smoothie Kit</div>
+            <div class="gate">Pricing available once your Palko account is approved.</div><div class="ab">Apply for Palko</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout stop"><b class="t">Field-level gate, not query-level</b>
+      Products stay in the grid; <b>only the pricing block and add control change</b>. Do not create a second catalog code path.</div>
+  </div>
+</div>
+</div>
+
+<!-- §7 Add DC panel -->
+<div class="projects" id="p7">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">7</div>
+    <div class="proj-info">
+      <div class="proj-label sources">SOURCES</div>
+      <h2>Add DC panel</h2>
+      <p>Replaces <code style="font:12px Consolas,monospace">dc-popup-box</code>. One DC per submission, double-entry confirmation. Same component used at registration Step 3.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="callout ok"><b class="t">One component, two contexts</b>
+      The Add DC panel and registration Step 3 are the <b>same component</b> — not similar, identical.</div>
+
+    <div class="mock">
+      <div class="mock-cap">From the pill (left) and at registration (right) — identical fields, identical order.</div>
+      <div class="vp">
+        <div class="flex-split">
+          <div class="stage">
+            <div class="pnl">
+              <div class="pnl-h"><h4>Add a DC</h4></div>
+              <div class="pnl-body">
+                <div class="pnl-tw">
+                  <div class="pnl-row"><label>Distributor <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok sl">UNFI</div></div>
+                  <div class="pnl-row"><label>Distribution Center <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok sl">Moreno Valley</div></div>
+                </div>
+                <div class="pnl-row"><label>Account Number <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok">8675309<span class="eye" style="margin-left:auto;color:#8d929b">👁</span></div></div>
+                <div class="pnl-row"><label>Confirm Account Number <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok">8675309<span class="eye" style="margin-left:auto;color:#8d929b">👁</span></div></div>
+              </div>
+              <div class="pnl-foot"><span class="pnl-btn gh">Cancel</span><span class="pnl-btn pri rt">Add</span></div>
+            </div>
+          </div>
+          <div class="stage">
+            <div class="pnl">
+              <div class="pnl-h"><h4>Add your first DC</h4><p>Just one to open your account — you can add more anytime.</p></div>
+              <div class="pnl-body">
+                <div class="pnl-tw">
+                  <div class="pnl-row"><label>Distributor <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok sl">KeHE</div></div>
+                  <div class="pnl-row"><label>Distribution Center <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok sl">Bloomington – DC 16</div></div>
+                </div>
+                <div class="pnl-row"><label>Account Number <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok">8675309<span class="eye" style="margin-left:auto;color:#8d929b">👁</span></div></div>
+                <div class="pnl-row"><label>Confirm Account Number <span class="rq" style="color:var(--err)">*</span></label><div class="pnl-fd ok">8675309<span class="eye" style="margin-left:auto;color:#8d929b">👁</span></div></div>
+              </div>
+              <div class="pnl-foot"><span class="pnl-btn gh">← Back</span><span class="pnl-btn pri rt">Sign Up</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="spec-list">
+      <li><b>One DC per submission.</b> No repeater rows.</li>
+      <li>Account confirmation is <b>plain double-entry</b> — do the two strings match.</li>
+      <li>Match on exact string after <b>trimming whitespace only</b>. Do not normalise case or strip characters.</li>
+      <li>Both number fields get a <b>show/hide eyeball</b>.</li>
+      <li>DC select disabled until distributor chosen: <code style="font:12px Consolas,monospace">Select distributor first</code>.</li>
+      <li>On success: panel closes, new pill appears lit with brief highlight.</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- §9 Product cards -->
+<div class="projects" id="p9">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">9</div>
+    <div class="proj-info">
+      <div class="proj-label flows">FLOWS</div>
+      <h2>Product cards</h2>
+      <p>Strip deal construction from the grid. One card shape, no reflow. OI/MCB/TOTAL move to PDP and cart line.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="callout why"><b class="t">Why the chips go</b>
+      OI and MCB are deal construction — they matter at reconciliation, not to a buyer scanning a grid. The buyer's question is "is this cheaper than usual", and <code style="font:12px Consolas,monospace">SRP $8.99 → $3.60</code> answers it.</div>
+
+    <div class="mock">
+      <div class="mock-cap">Four data states — promo, case pricing, no markers, First Mile gate — <b>one card shape</b>.</div>
+      <div class="vp">
+        <div class="card-grid">
+          <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Buddha Tea</div>
+            <div class="pn">4th Chakra Tea</div><div class="pr">SRP <s>$8.99</s> <b>$3.60</b> <em>/ Unit</em></div>
+            <div class="reqs"><a>Request Sample</a><a>Request Placement</a></div><div class="qa">+ Add</div></div>
+          <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Bianco DiNapoli</div>
+            <div class="pn">Organic Crushed Puree Tomatoes</div><div class="pr">WHLSE <b>$40.00</b> <em>/ Case</em></div>
+            <div class="reqs"><a>Request Sample</a></div><div class="qa">+ Add</div></div>
+          <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Skoy</div>
+            <div class="pn">Skoy Scrub – 2CT</div><div class="pr">WHLSE <b>$18.60</b> <em>/ Case</em></div>
+            <div class="reqs"></div><div class="qa">+ Add</div></div>
+          <div class="cd fm-card"><div class="bm">🔖</div><div class="thumb">first mile</div><div class="br">Alaffia</div>
+            <div class="pn">Everyday Shea Lotion</div>
+            <div class="gate">Pricing available once your Palko account is approved.</div><div class="ab">Apply for Palko</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Add-to-cart toast</div>
+    <div class="mock">
+      <div class="mock-cap">Multi-source (top) and single-source (bottom)</div>
+      <div class="vp" style="min-width:600px;padding:10px 0">
+        <div class="tst"><div class="tk">✓</div><div>
+          <div class="tmn">Added — Organic Crushed Puree</div>
+          <div class="tsh">🚚 Ships from <b>KeHE · Bloomington – DC 16</b></div>
+          <div class="tsh" style="margin-top:3px;font-size:11px">Grouped with 1 other item · change in cart</div>
+          <span class="tlk">View cart →</span></div></div>
+        <div class="tst" style="width:300px"><div class="tk">✓</div><div>
+          <div class="tmn">Added — 4th Chakra Tea</div>
+          <span class="tlk" style="margin-top:4px">View cart →</span></div></div>
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <tr><th>Removed from cards</th><th>Moves to</th></tr>
+      <tr><td>OI / MCB / TOTAL chips</td><td>PDP and cart line</td></tr>
+      <tr><td>60% Off badge</td><td>Dropped — struck price already says it</td></tr>
+      <tr><td>Ships via label</td><td>Removed entirely</td></tr>
+      <tr><td>DC selector</td><td>Cart line — the only place</td></tr>
+      <tr><td>Quantity stepper</td><td>Cart</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ RELEASE 3 ═══════════ -->
+<div class="release-banner r3">Release 3 — Follows <span>Depends on Release 2 shipping.</span></div>
+
+<!-- §11 Cart -->
+<div class="projects" id="p11">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">11</div>
+    <div class="proj-info">
+      <div class="proj-label flows">FLOWS</div>
+      <h2>Cart, review and submit</h2>
+      <p>The cart line is the only place a buyer can change where something ships from. Grouped by source, account number on the group header.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="mock">
+      <div class="mock-cap">Cart grouped by source. Account number on the <b>group header</b>, not beside the brand chip.</div>
+      <div class="vp">
+        <div class="cart-wrap">
+          <div class="cart-main">
+            <div style="font-size:18px;font-weight:600;margin-bottom:2px">Your cart</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:13px">6 items · 2 sources · will generate 2 turnover documents</div>
+            <div class="cart-group">
+              <div class="cart-gh">🚚 <b>UNFI · Moreno Valley</b><span class="cart-chip">Account <b>7741208</b></span><span class="cart-gc">2 products</span></div>
+              <div class="cart-line"><div class="cart-lt"></div><div class="cart-lm"><div class="cart-lbr">Buddha Tea</div>
+                <div class="cart-lnm">Alfalfa Leaf Tea</div><div class="cart-lpr">SRP <s>$6.99</s> <b>$2.80</b> / Unit</div>
+                <div class="cart-prm">OI 10% + MCB 50% = 60% off</div></div>
+                <div><div class="cart-qt"><span>−</span><b>5</b><span>+</span></div><div class="cart-ql">units</div></div>
+                <div class="cart-ls">$14.00</div><div class="cart-dl">🗑</div></div>
+            </div>
+            <div class="cart-group">
+              <div class="cart-gh">🚚 <b>KeHE · Bloomington – DC 16</b><span class="cart-chip">Account <b>8675309</b></span><span class="cart-gc">1 product</span></div>
+              <div class="cart-line"><div class="cart-lt"></div><div class="cart-lm"><div class="cart-lbr">Bianco DiNapoli</div>
+                <div class="cart-lnm">Organic Crushed Puree Tomatoes</div><div class="cart-lpr">WHLSE <b>$40.00</b> / Case</div>
+                <div class="cart-sel"><span style="color:var(--muted)">Ships from</span> <b>KeHE · Bloomington – DC 16</b></div>
+                <div class="cart-hint">Also at UNFI · Moreno Valley — move to combine into one order</div></div>
+                <div><div class="cart-qt"><span>−</span><b>1</b><span>+</span></div><div class="cart-ql">cases</div></div>
+                <div class="cart-ls">$40.00</div><div class="cart-dl">🗑</div></div>
+            </div>
+          </div>
+          <div class="cart-aside">
+            <div class="cart-sr"><span>UNFI · Moreno Valley</span><span>$17.60</span></div>
+            <div class="cart-sr"><span>KeHE · Bloomington</span><span>$40.00</span></div>
+            <div class="cart-sr tt"><span>Total</span><span>$57.60</span></div>
+            <div style="font-size:11.5px;color:#2f7d3f;background:#eaf7ec;border-radius:6px;padding:6px 9px;margin-top:9px">You saved $27.94 on promos</div>
+            <div class="cart-info">This is not a purchase. A turnover document is generated for each source and sent to your distributor.</div>
+            <div class="cart-btn">Review and Submit</div>
+            <span class="cart-lk">← Continue shopping</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <tr><th>Surface</th><th>Ships from</th></tr>
+      <tr><td>Product card</td><td>Not shown</td></tr>
+      <tr><td>PDP</td><td>Not shown</td></tr>
+      <tr><td>Add-to-cart toast</td><td>Named, not editable</td></tr>
+      <tr><td><b>Cart line</b></td><td><b>Editable — the only place</b></td></tr>
+      <tr><td>Review / Submitted</td><td>Read-only</td></tr>
+    </table>
+
+    <ul class="spec-list">
+      <li>Selector renders <b>only where the product is at 2+ of the buyer's lit sources</b></li>
+      <li>Changing a line's DC <b>re-groups immediately</b></li>
+      <li>The <b>review step stays read-only</b></li>
+      <li>Account number chip moves to the <b>group header</b></li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- §12 Category rail -->
+<div class="projects" id="p12">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">12</div>
+    <div class="proj-info">
+      <div class="proj-label flows">FLOWS</div>
+      <h2>Category rail</h2>
+      <p>Removed from staging — a query for <code style="font:12px Consolas,monospace">[class*="filter"]</code> returns zero elements. Must be restored.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="callout stop"><b class="t">This contradicts a written spec</b>
+      The navigation spec removed the DC checkbox tree but explicitly kept Shop by Category, Shop by Brands, the Brands filter and search. The DC tree was correctly removed; the category sidebar was not.</div>
+
+    <div class="mock">
+      <div class="mock-cap">Two filters applied — <b>the buyer can see why the grid is short</b>.</div>
+      <div class="vp">
+        <div class="rail-wrap">
+          <div class="rail-side">
+            <h5>Categories</h5>
+            <div class="rail-opt"><i class="bx"></i>Body Care<span class="cnt">14</span></div>
+            <div class="rail-opt"><i class="bx on"></i><b>Breakfast</b><span class="cnt">9</span></div>
+            <div class="rail-opt"><i class="bx on"></i><b>Cereal</b><span class="cnt">6</span></div>
+            <div class="rail-opt"><i class="bx"></i>Cleaning<span class="cnt">4</span></div>
+            <div class="rail-opt"><i class="bx"></i>Dairy<span class="cnt">11</span></div>
+            <h5 class="two">Brands</h5>
+            <div class="rail-opt"><i class="bx"></i>Bianco DiNapoli<span class="cnt">6</span></div>
+            <div class="rail-opt"><i class="bx"></i>Buddha Tea<span class="cnt">12</span></div>
+          </div>
+          <div class="rail-grid">
+            <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Nature's Path</div>
+              <div class="pn">Coconut Crunch Cereal</div><div class="pr">WHLSE <b>$44.00</b> <em>/ Case</em></div>
+              <div class="reqs"><a>Request Sample</a></div><div class="qa">+ Add</div></div>
+            <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Nature's Path</div>
+              <div class="pn">Coconut Crunch 7oz</div><div class="pr">WHLSE <b>$36.00</b> <em>/ Case</em></div>
+              <div class="reqs"></div><div class="qa">+ Add</div></div>
+            <div class="cd"><div class="bm">🔖</div><div class="thumb">product</div><div class="br">Nature's Path</div>
+              <div class="pn">Cinnamon Coconut Crunch</div><div class="pr">WHLSE <b>$36.00</b> <em>/ Case</em></div>
+              <div class="reqs"><a>Request Placement</a></div><div class="qa">+ Add</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="spec-list">
+      <li><b>Restore</b> <code style="font:12px Consolas,monospace">aside.tp-filter-card</code> to the catalog page</li>
+      <li><b>Always open above 1024px. Remove the show/hide toggle.</b></li>
+      <li>Below 1024px → <b>drawer</b> with filter count on button</li>
+      <li>Replace hardcoded <code style="font:12px Consolas,monospace">top: 170px</code> with measured header height variable from §4</li>
+      <li>Filter selections <b>persist across navigation within a session</b></li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- §13 Empty and thin states -->
+<div class="projects" id="p13">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">13</div>
+    <div class="proj-info">
+      <div class="proj-label edges">EDGES</div>
+      <h2>Empty and thin catalog states</h2>
+      <p>These are not edge cases — they are the launch condition for part of the buyer base.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="mock">
+      <div class="mock-cap">Left: all sources off. Right: nothing active at the buyer's DC.</div>
+      <div class="vp">
+        <div class="flex-split">
+          <div>
+            <div class="b2" style="border-top:0"><span class="pl">Shopping from</span>
+              <span class="pill off"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· DC 16</span></span>
+              <span class="pill off"><i class="dt"></i><span class="ds">UNFI</span><span class="dc">· Moreno Valley</span></span>
+              <span class="pill add">+ Add DC</span></div>
+            <div class="emp"><h4>All sources are off</h4><p>Turn one on to see products.</p>
+              <span class="btn-o">Turn all sources on</span></div>
+          </div>
+          <div>
+            <div class="b2" style="border-top:0"><span class="pl">Shopping from</span>
+              <span class="pill"><i class="dt"></i><span class="ds">KeHE</span><span class="dc">· Elkton – DC 27</span></span>
+              <span class="pill act"><i style="width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #b3b8c0"></i><span class="ds" style="color:var(--violet)">First Mile</span><span style="font-weight:700">· Apply</span></span></div>
+            <div class="emp"><h4>Nothing at KeHE Elkton – DC 27 yet</h4>
+              <p>First Mile ships by the case from anywhere — see what's available.</p>
+              <span class="btn-o">Browse First Mile</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <tr><th>State</th><th>Behaviour</th></tr>
+      <tr><td>All pills off</td><td>Message plus recovery — not a blank grid</td></tr>
+      <tr><td>Nothing at their DC</td><td><b>Do not show "New items coming soon".</b> Show First Mile — it is not DC-scoped</td></tr>
+      <tr><td>One or two products</td><td><b>Worse than empty.</b> Zero reads as "not launched yet"; a single card reads as "this is the entire catalog"</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- Placeholder anchors for remaining sections -->
+<div class="projects" id="p4">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">4</div>
+    <div class="proj-info">
+      <div class="proj-label header">HEADER</div>
+      <h2>Directional retracting header</h2>
+      <p>Buyer laptops render ~625 CSS px of viewport height. A static two-band header consumes ~17% permanently. Sticky wrapper with scroll-direction toggle.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <table class="spec-table">
+      <tr><th>Scroll state</th><th>Wrapper inline style</th></tr>
+      <tr><td>At top</td><td><code style="font:12px Consolas,monospace">top: 0px</code></td></tr>
+      <tr><td>Scrolling <b>down</b></td><td><code style="font:12px Consolas,monospace">top: -{measuredHeaderHeight}px</code></td></tr>
+      <tr><td>Scrolling <b>up</b></td><td><code style="font:12px Consolas,monospace">top: 0px</code></td></tr>
+    </table>
+    <ul class="spec-list">
+      <li>Wrapper is <code style="font:12px Consolas,monospace">position:sticky</code> with <code style="font:12px Consolas,monospace">transition</code> on <code style="font:12px Consolas,monospace">top</code>, 200ms ease-out</li>
+      <li><b>Sticky rather than fixed</b> — no layout jump, no scroll-position correction</li>
+      <li>Height measured once, exposed as CSS variable. Every downstream sticky offset reads it. <b>Do not hardcode.</b></li>
+      <li>Never retract within ~160px of top. Hold open while dropdown is expanded.</li>
+    </ul>
+    <div class="callout why"><b class="t">Note</b>
+      <code style="font:12px Consolas,monospace">position:sticky</code> fails silently inside an ancestor with <code style="font:12px Consolas,monospace">overflow: hidden|auto|scroll</code>. Check the ancestor chain first.</div>
+    <div class="acceptance"><h4>Acceptance</h4><ul>
+      <li>Logo, nav and pills all visible on one line at 1030, 1100, 1150, 1190, 1440</li>
+      <li>Account block collapses to avatar below ~1100px without nav wrapping</li>
+      <li>Header retracts on scroll-down, returns on scroll-up, no content jump</li>
+      <li>Nav identical on shop, PDP, cart, checkout and post-registration</li>
+    </ul></div>
+  </div>
+</div>
+</div>
+
+<div class="projects" id="p8">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">8</div>
+    <div class="proj-info">
+      <div class="proj-label flows">FLOWS</div>
+      <h2>Registration</h2>
+      <p>Buyers are granted access on registration — no approval queue. Step 3 uses the Add DC component with first-run copy.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="callout stop"><b class="t">Live and wrong</b>
+      The thank-you page reads "Turnpike opens for business before the end of the month" — leftover pre-launch messaging. The same account is simultaneously logged in and browsing the catalog.</div>
+
+    <table class="spec-table">
+      <tr><th>Field</th><th>Action</th><th>Why</th></tr>
+      <tr><td>Store Name</td><td>Keep, required</td><td>Identity</td></tr>
+      <tr><td>Store Size</td><td>Keep, required</td><td>Order size and SKU capacity</td></tr>
+      <tr><td>Number of locations</td><td><b>Make optional</b></td><td>Nothing reads it. Retained for research only</td></tr>
+      <tr><td>Store Type</td><td><b style="color:var(--err)">Remove</b></td><td>Turnpike is indie-only; chain signal already carried by location count and sq ft</td></tr>
+      <tr><td>Shipping address</td><td>Keep, required</td><td>ZIP preselects nearest DC on Step 3</td></tr>
+    </table>
+
+    <ul class="spec-list">
+      <li><b>Normalise email to lowercase on save.</b></li>
+      <li>Unify Store Size on the styled select control.</li>
+      <li>Number-of-locations dropdown overlaps Street address — fix z-index.</li>
+      <li>Terms agreed at <b>Step 3 only</b>. Remove from review/checkout.</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<div class="projects" id="p10">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">10</div>
+    <div class="proj-info">
+      <div class="proj-label flows">FLOWS</div>
+      <h2>Product detail page</h2>
+      <p>Fix the gap below the image, remove Additional Information tab, structured spec table, standardise bookmark icon.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <div class="callout stop"><b class="t">Do not</b>
+      Do not fix the image gap with negative margin, a fixed height, or a top-margin adjustment. Those treat the symptom.</div>
+    <ul class="spec-list">
+      <li>Change gallery/summary row to <b>size to content</b> — <code style="font:12px Consolas,monospace">align-items: flex-start</code></li>
+      <li><b>Remove Additional Information tab</b> — stock WooCommerce scaffolding</li>
+      <li>With one tab remaining, <b>remove the tab strip</b></li>
+      <li>Description appears <b>twice</b> — keep tab copy, remove from summary column</li>
+      <li>PDP wishlist uses heart; cards use bookmark. <b>Standardise on bookmark.</b></li>
+      <li><b>No Ships via and no DC selector</b> on PDP</li>
+    </ul>
+    <div class="mock">
+      <div class="mock-cap">Spec table, buy controls above the fold, description once.</div>
+      <div class="vp" style="min-width:820px">
+        <div style="display:flex;gap:22px;padding:18px 20px">
+          <div style="width:280px;flex:0 0 280px"><div style="height:220px;border-radius:9px;background:#f5f6f8;display:flex;align-items:center;justify-content:center;color:#c7cad0;font-size:11px">product image</div></div>
+          <div style="flex:1">
+            <span style="display:inline-block;border:1px solid var(--soft-line);color:var(--o);border-radius:999px;padding:3px 11px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px">Skoy</span>
+            <div style="font-size:21px;font-weight:600;margin-bottom:8px">Skoy Scrub – 2CT</div>
+            <div style="font-size:13px;margin-bottom:11px">WHLSE <b style="font-size:23px;color:var(--o)">$18.60</b>
+              <span style="color:var(--muted)">/ Case</span> &nbsp;·&nbsp; <span style="color:var(--muted)">SRP $4.65 / Unit</span></div>
+            <table class="spec-table" style="max-width:420px;margin-bottom:13px;font-size:12.5px;border:1px solid var(--line);border-radius:8px;overflow:hidden">
+              <tr><td style="width:110px;background:#fafbfc;color:var(--muted)">Case pack</td><td><b>4 units</b></td></tr>
+              <tr><td style="background:#fafbfc;color:var(--muted)">Inner pack</td><td><b>2 ct</b></td></tr>
+              <tr><td style="background:#fafbfc;color:var(--muted)">UPC</td><td><b>8 51242 00212 6</b></td></tr>
+              <tr><td style="background:#fafbfc;color:var(--muted)">Unit type</td><td><b>Each</b></td></tr>
+            </table>
+            <div style="display:flex;gap:9px;align-items:center;margin-bottom:9px">
+              <div class="cart-qt" style="height:38px"><span>−</span><b>1</b><span>+</span></div>
+              <div style="flex:1;height:38px;border-radius:8px;background:var(--o);color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center">Add to cart</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <div style="flex:1;height:34px;border-radius:8px;border:1px solid var(--soft-line);color:var(--o);font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Request Sample</div>
+              <div style="flex:1;height:34px;border-radius:8px;border:1px solid var(--soft-line);color:var(--o);font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Request Placement</div>
+              <div style="width:36px;height:34px;border-radius:8px;border:1px solid var(--soft-line);color:var(--o);display:flex;align-items:center;justify-content:center">🔖</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="projects" id="p11c">
+<div class="project">
+  <div class="proj-head" onclick="this.parentElement.classList.toggle('open')">
+    <div class="proj-num">11b</div>
+    <div class="proj-info">
+      <div class="proj-label flows">FLOWS</div>
+      <h2>Continuation screens</h2>
+      <p>Every terminal action currently ends in a dead end. A buyer who just submitted is the most likely person to submit another.</p>
+    </div>
+    <div class="proj-toggle">▼</div>
+  </div>
+  <div class="proj-body">
+    <table class="spec-table">
+      <tr><th>After</th><th>Primary action</th><th>Secondary</th></tr>
+      <tr><td>Order submitted</td><td>Continue shopping</td><td>View request</td></tr>
+      <tr><td>Sample requested</td><td><b>Inline confirmation — do not navigate</b></td><td></td></tr>
+      <tr><td>Placement requested</td><td><b>Inline confirmation — do not navigate</b></td><td></td></tr>
+      <tr><td>Registration complete</td><td>Start shopping</td><td>Add another DC</td></tr>
+      <tr><td>Empty cart</td><td>Browse products</td><td>New arrivals</td></tr>
+    </table>
+
+    <div class="mock">
+      <div class="mock-cap">Submitted — names both documents and the request number, then offers a way back in.</div>
+      <div class="vp" style="min-width:700px">
+        <div class="emp">
+          <div style="width:46px;height:46px;border-radius:50%;background:#e9f7ec;color:#2f8f3f;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px">✓</div>
+          <h4>Turnover request submitted</h4>
+          <p>Two documents are on their way to your distributors.</p>
+          <div style="display:inline-block;border:1px solid var(--line);border-radius:9px;padding:12px 18px;text-align:left;margin-bottom:14px;min-width:320px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;gap:24px;margin-bottom:5px"><span>Request</span><b>#TP-10428</b></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;gap:24px;margin-bottom:5px"><span>UNFI · Moreno Valley</span><b>$17.60 · 2 products</b></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;gap:24px"><span>KeHE · Bloomington – DC 16</span><b>$40.00 · 1 product</b></div>
+          </div><br>
+          <span class="btn-o" style="margin-right:8px">Continue shopping</span>
+          <span class="btn-o" style="background:var(--field);color:var(--ink)">View request</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+function openProject(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const proj = el.querySelector('.project');
+  if(proj && !proj.classList.contains('open')){
+    proj.classList.add('open');
+  }
+}
+
+// Sidebar active state on scroll
+const sections = document.querySelectorAll('.projects[id]');
+const links = document.querySelectorAll('.side a[href]');
+window.addEventListener('scroll',()=>{
+  let cur = '';
+  sections.forEach(s=>{
+    if(s.getBoundingClientRect().top < 200) cur = s.id;
+  });
+  links.forEach(l=>{
+    l.classList.remove('active');
+    if(l.getAttribute('href') === '#'+cur) l.classList.add('active');
+  });
+},{passive:true});
+</script>
+</body>
+</html>
