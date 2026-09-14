@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Turnpike — Rate Card (type options)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Archivo:wght@600;700;800&family=Inter:wght@400;500;700&family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== TURNPIKE SURFACE CLASSES — accent flips by ground ===== */
+.tp-white { --bg:#ffffff; --fg:#202435; --fg-muted:#5a5f75; --accent:#E75000; --rule:rgba(32,36,53,.18); }
+.tp-cream { --bg:#FFF8EE; --fg:#202435; --fg-muted:#5a5f75; --accent:#E75000; --rule:rgba(32,36,53,.18); }
+.tp-ink   { --bg:#202435; --fg:#ffffff; --fg-muted:#c4c8da; --accent:#FF8F00; --rule:rgba(255,255,255,.20); }
+.tp-white,.tp-cream,.tp-ink{ background:var(--bg); color:var(--fg); }
+
+html,body{background:#202435 !important;min-height:100%}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--text);-webkit-font-smoothing:antialiased}
+.bleed{background:#202435;min-height:100vh;width:100%;display:flex;flex-direction:column;align-items:center;padding:26px 12px}
+
+.page{width:8.5in;min-height:11in;padding:.5in;display:flex;flex-direction:column;
+      box-shadow:0 10px 44px rgba(0,0,0,.55);margin-bottom:26px}
+
+h1{font-family:var(--display);font-weight:800;font-size:32pt;line-height:.95;letter-spacing:-.027em}
+h2{font-family:var(--display);font-weight:800;font-size:15pt;letter-spacing:-.012em}
+h3{font-family:var(--display);font-weight:700;font-size:11.5pt;letter-spacing:-.008em}
+p,li,td,th{font-size:9.7pt;line-height:1.46}
+.muted{color:var(--fg-muted)}
+.lede{font-size:12.4pt;line-height:1.38;max-width:64ch}
+
+.masthead{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px;border-bottom:2px solid var(--fg)}
+.mark{font-family:var(--display);font-weight:800;font-size:12pt;letter-spacing:-.01em}
+.mark span{color:var(--accent)}
+.dateline{font-size:8.6pt;color:var(--fg-muted)}
+
+.gate{margin:.26in 0;padding:16px 20px;border-radius:3px;display:flex;gap:18px;align-items:flex-start}
+.gate .keyline{width:4px;align-self:stretch;background:var(--accent);border-radius:2px;flex:none}
+.gate h2{margin-bottom:5px}
+.gate p{color:var(--fg-muted);max-width:60ch}
+
+.block{padding:.2in 0;border-top:1px solid var(--rule)}
+.block-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:9px}
+.block-head .where{font-size:9pt;color:var(--fg-muted);text-align:right;flex:none;max-width:26ch}
+.tag{display:inline-block;font-size:8.6pt;font-weight:700;color:var(--accent);margin-bottom:3px}
+
+table{width:100%;border-collapse:collapse}
+td,th{padding:7px 0;vertical-align:top;text-align:left}
+th{font-size:8.6pt;font-weight:700;color:var(--fg-muted);border-bottom:1px solid var(--rule)}
+tbody tr td{border-bottom:1px solid var(--rule)}
+tbody tr:last-child td{border-bottom:none}
+.num{text-align:right;font-family:var(--display);font-weight:700;font-size:12.5pt;white-space:nowrap;width:1.4in}
+.rung{font-weight:700}
+.rung em{font-style:normal;color:var(--accent);font-family:var(--display);font-size:9pt;margin-right:6px}
+.what{color:var(--fg-muted);font-weight:400;margin-top:2px}
+.addon td{padding-top:9px}
+.addon .what{font-size:9pt}
+.small{font-size:9.7pt;font-family:var(--text);font-weight:400;color:var(--fg-muted)}
+
+.note{margin-top:10px;font-size:8.9pt;color:var(--fg-muted);max-width:72ch}
+.note b{color:var(--fg);font-weight:700}
+
+.card{margin-top:11px;padding:13px 16px;border-radius:3px}
+.card h3{margin-bottom:6px}
+.card ul{list-style:none;margin-top:4px}
+.card li{padding:3px 0 3px 15px;position:relative;color:var(--fg-muted)}
+.card li:before{content:"";position:absolute;left:0;top:.62em;width:6px;height:1.5px;background:var(--accent)}
+.card li b{color:var(--fg);font-weight:700}
+
+.closer{margin-top:auto;padding:15px 20px;border-radius:3px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.closer .big{font-family:var(--display);font-weight:800;font-size:17pt;letter-spacing:-.018em;line-height:1.05}
+.closer p{color:var(--fg-muted);max-width:40ch;font-size:9pt}
+
+.tbd{border-bottom:1.5px dotted var(--accent);padding-bottom:1px}
+
+
+/* ===== FONT OPTIONS ===== */
+html{ --display:Syne,sans-serif; --text:"DM Sans",system-ui,sans-serif; --h1-track:-.027em; --h1-size:32pt; }
+html[data-font="archivo"]{ --display:Archivo,sans-serif; --text:Inter,system-ui,sans-serif; --h1-track:-.032em; --h1-size:33pt; }
+html[data-font="fraunces"]{ --display:Fraunces,Georgia,serif; --text:Inter,system-ui,sans-serif; --h1-track:-.018em; --h1-size:32pt; }
+html[data-font="grotesk"]{ --display:"Space Grotesk",sans-serif; --text:"IBM Plex Sans",system-ui,sans-serif; --h1-track:-.03em; --h1-size:32pt; }
+h1{font-size:var(--h1-size);letter-spacing:var(--h1-track)}
+html[data-font="archivo"] h1,html[data-font="archivo"] h2,html[data-font="archivo"] .mark,
+html[data-font="archivo"] .closer .big{font-weight:800}
+html[data-font="fraunces"] h1,html[data-font="fraunces"] .closer .big{font-weight:900}
+html[data-font="fraunces"] .num{font-weight:700}
+
+.fontbar{position:sticky;top:0;z-index:50;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  padding:10px 14px;margin-bottom:18px;border-radius:6px;background:#2b3049;border:1px solid rgba(255,255,255,.14)}
+.fontbar span{font-size:12px;color:#c4c8da;margin-right:4px;font-family:system-ui,sans-serif}
+.fontbar button{font:inherit;font-size:12.5px;font-family:system-ui,sans-serif;cursor:pointer;
+  padding:7px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff}
+.fontbar button[aria-pressed="true"]{background:#FF8F00;border-color:#FF8F00;color:#202435;font-weight:700}
+
+@media print{
+  @page{size:letter;margin:0}
+  html,body{background:#ffffff !important}
+  .fontbar{display:none !important}
+  .bleed{background:#ffffff;padding:0;min-height:0}
+  .page{box-shadow:none;margin:0;page-break-after:always}
+  .tp-ink{ --bg:#ffffff; --fg:#202435; --fg-muted:#5a5f75; --accent:#E75000; --rule:rgba(32,36,53,.20); }
+  .tp-white,.tp-cream{ --bg:#ffffff; --fg:#202435; --fg-muted:#5a5f75; --accent:#E75000; --rule:rgba(32,36,53,.20); }
+  .gate,.card,.closer{border:1px solid rgba(32,36,53,.25)}
+}
+</style>
+</head>
+<body>
+<div class="bleed">
+
+<div class="fontbar">
+  <span>Type:</span>
+  <button data-set="syne" aria-pressed="true">Syne / DM Sans</button>
+  <button data-set="archivo" aria-pressed="false">Archivo / Inter</button>
+  <button data-set="fraunces" aria-pressed="false">Fraunces / Inter</button>
+  <button data-set="grotesk" aria-pressed="false">Space Grotesk / Plex</button>
+</div>
+
+
+<section class="page tp-white">
+
+  <div class="masthead">
+    <span class="mark">TURN<span>PIKE</span></span>
+    <span class="dateline">Brand rate card &middot; September 2026</span>
+  </div>
+
+  <div style="padding:.3in 0 0">
+    <h1>One interface.<br>A thousand buyers.</h1>
+    <p class="lede muted" style="margin-top:12px">No brand can touch five hundred independent buyers. Turnpike gives you
+    one place to reach them &mdash; and they order through the distributor account they already have.</p>
+  </div>
+
+  <div class="gate tp-ink">
+    <span class="keyline"></span>
+    <div>
+      <h2>Turnpike needs an open DC</h2>
+      <p>At least one live distributor DC &mdash; UNFI, KeHE or Threshold &mdash; in the region you want to sell. That is
+      what makes ordering frictionless for the buyer. No open DC yet? Start with iLevel brokerage instead.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-head">
+      <div>
+        <span class="tag">The ladder</span>
+        <h2>Four rungs. Climb when you're ready.</h2>
+      </div>
+      <span class="where">Monthly, cancel any time, no term</span>
+    </div>
+    <table>
+      <thead><tr><th>Rung</th><th class="num" style="text-align:right">Monthly</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="rung"><em>01</em>Placement and standing deals
+            <div class="what">Your items live on the platform with MCB and off-invoice deals visible to every buyer in your DCs.</div></td>
+          <td class="num">$699</td>
+        </tr>
+        <tr>
+          <td class="rung"><em>02</em>Custom promotions
+            <div class="what">Deals cut by store rating instead of one flat offer &mdash; your strongest support goes where it converts.</div></td>
+          <td class="num">$899</td>
+        </tr>
+        <tr>
+          <td class="rung"><em>03</em>Buyer email
+            <div class="what">Targeted Klaviyo campaigns to indie buyers, plus door and void reporting from ShelfIQ.</div></td>
+          <td class="num">$1,299</td>
+        </tr>
+        <tr>
+          <td class="rung"><em>04</em>Indie channel management
+            <div class="what">iLevel as your broker of record for independents. Full ShelfIQ with Fix the Mix assortment plans.</div></td>
+          <td class="num">$1,599</td>
+        </tr>
+        <tr class="addon">
+          <td class="what">Setup &mdash; $100 per item, one time, covering every DC<br>
+          Assortment bands &mdash; 6 to 15 items add $200/mo &middot; 16 or more add $400/mo</td>
+          <td class="num small" style="font-family:var(--text)">per item</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="block">
+    <div class="block-head">
+      <div>
+        <span class="tag">What every rung includes</span>
+        <h2>The 5% floor</h2>
+      </div>
+    </div>
+    <p class="muted" style="max-width:68ch">Every brand on Turnpike carries a standing 5% manufacturer chargeback, so
+    buyers learn there is always a deal here. It is the reason they come back without being asked.</p>
+    <p class="note"><b>That 5% is not our fee.</b> It is promotional funding that goes to the retailer. We never take a
+    percentage of it, or of anything else you sell.</p>
+
+    <div class="card tp-cream">
+      <h3>The guarantee</h3>
+      <ul>
+        <li><b>Pro-rata, on new doors and new placements.</b> Not on revenue &mdash; we don't control your velocity, so we don't promise it.</li>
+        <li><b>Terms set per brand, up front.</b> We meet, look at your own data, and build the number together before you sign.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="closer tp-ink">
+    <span class="big">No commission.<br>Not now, not later.</span>
+    <p>Brokers take five percent of everything. Marketplaces take a cut of every order. We charge a flat fee and stop
+    there, so everything you build stays yours.</p>
+  </div>
+
+</section>
+</div>
+<script>
+document.querySelectorAll('.fontbar button').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.fontbar button').forEach(function(x){x.setAttribute('aria-pressed','false')});
+    b.setAttribute('aria-pressed','true');
+    var v = b.dataset.set;
+    if(v === 'syne'){ document.documentElement.removeAttribute('data-font'); }
+    else { document.documentElement.setAttribute('data-font', v); }
+  });
+});
+</script>
+</body>
+</html>
